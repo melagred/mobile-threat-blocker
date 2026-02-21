@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">SafetyFirst</string>
+    <string name="protection_off">Protection: OFF</string>
+    <string name="enable_protection">Enable Protection</string>
+    <string name="protection_on">Protection: ON</string>
+</resources>
