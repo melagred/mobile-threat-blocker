@@ -36,6 +36,12 @@ class LoginsViewModel : ViewModel() {
 
         }
     }
+    private val _vpnOn = MutableStateFlow(false)
+    val vpnOn: StateFlow<Boolean> = _vpnOn.asStateFlow()
+
+    fun setVpnOn(on: Boolean) {
+        _vpnOn.value = on
+    }
 }
 
 sealed class RegistrationState {
