@@ -24,9 +24,9 @@ public class SafetyFirstVpnService extends VpnService {
     private static final int FOREGROUND_ID = 1;
 
     private ParcelFileDescriptor vpnInterface;
-    private maindata.MalwareAppDatabase database;
-    private maindata.MalwareDao malwareDao;
-    private maindata.ServerSecurityManager securityManager;
+    private frontend.MalwareAppDatabase database;
+    private frontend.MalwareDao malwareDao;
+    private frontend.ServerSecurityManager securityManager;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -38,9 +38,9 @@ public class SafetyFirstVpnService extends VpnService {
         if (ACTION_START.equals(action)) {
             // Must happen immediately for a foreground service
             updateForegroundNotification("Protection is ON");
-            database = maindata.MalwareAppDatabse.Companion.getDatabase(this);
+            database = frontend.MalwareAppDatabse.Companion.getDatabase(this);
             malwareDao = database.malwareDao();
-            securityManager = new maindata.ServerSecurityManager("http://4.154.154.5", malwareDao);
+            securityManager = new frontend.ServerSecurityManager("http://4.154.154.5", malwareDao);
             establishMinimalVpn();
         } else if (ACTION_STOP.equals(action)) {
             stopVpn();
