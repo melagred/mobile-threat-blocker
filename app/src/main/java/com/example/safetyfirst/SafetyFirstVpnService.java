@@ -38,7 +38,7 @@ public class SafetyFirstVpnService extends VpnService {
         if (ACTION_START.equals(action)) {
             // Must happen immediately for a foreground service
             updateForegroundNotification("Protection is ON");
-            database = frontend.MalwareAppDatabse.Companion.getDatabase(this);
+            database = frontend.MalwareAppDatabase.Companion.getDatabase(this);
             malwareDao = database.malwareDao();
             securityManager = new frontend.ServerSecurityManager("http://4.154.154.5", malwareDao);
             establishMinimalVpn();
