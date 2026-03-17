@@ -13,10 +13,7 @@ def openTun(tunName):
     return tun
 
 syn = b'E\x00\x00,\x00\x01\x00\x00@\x06\x00\xc4\xc0\x00\x02\x02"\xc2\x95Cx\x0c\x00P\xf4p\x98\x8b\x00\x00\x00\x00`\x02\xff\xff\x18\xc6\x00\x00\x02\x04\x05\xb4'
-tun = openTun(b"tun0")
-tun.write(syn)
-reply = tun.read(1024)
-print(repr(reply))
+
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
     """
@@ -35,14 +32,20 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             pieces.append(self.request.recv(2000))
             total += len(pieces[-1])
         self.data = b''.join(pieces)
+
+        tun = openTun(b"tun0")
+        tun.write(self.data)
+        reply = tun.read(1024)
+        print(repr(reply))
+
         print(f"Received from {self.client_address[0]}:")
         print(self.data.decode("utf-8"))
         # just send back the same data, but upper-cased
-        self.request.sendall(self.data.upper())
+        self.request.sendall(reply)
         # after we return, the socket will be closed.
 
 if __name__ == "__main__":
-    HOST, PORT = "localhost", 9999
+    HOST, PORT = "172.17.0.4", 9999
 
     # Create the server, binding to localhost on port 9999
     with socketserver.TCPServer((HOST, PORT), MyTCPHandler) as server:
