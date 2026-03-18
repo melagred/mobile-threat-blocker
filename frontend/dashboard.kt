@@ -1,3 +1,5 @@
+package com.example.cse4550_login
+
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.collectAsState
 
 
 @Composable
@@ -35,7 +39,9 @@ fun DashboardScreen(
     SettingsClick: () -> Unit) {
 
     val context = LocalContext.current
-    var vpnOn by remember { mutableStateOf(false) }
+    val activity = context.findActivity()
+    val vpnOn by viewModel.vpnOn.collectAsState()
+
 
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.padding(10.dp))
@@ -58,15 +64,22 @@ fun DashboardScreen(
 
             Button(onClick = {
                 if (!vpnOn) {
-                    startVpn(context)
-                    vpnOn = true
+                    val intent = VpnService.prepare(context)
+                    if (intent != null){
+                        activity?.startActivityForResult(intent, 100)
+                    } else {
+                        startVpn(context)
+                        viewModel.setVpnOn(true)
+                    }
+
                 } else {
                     stopVpn(context)
-                    vpnOn = false
+                    viewModel.setVpnOn(false)
                 }
             }) {
                 Text(if (vpnOn) "Stop VPN" else "Start VPN")
             }
+
 
 
             Text("Content inside the gray block")
@@ -108,41 +121,38 @@ fun DashboardScreen(
     }
 
 
-//fun startVpn(context: Context) {
-   // val intent = VpnService.prepare(context)
-  //  if (intent != null) {
-  //      (context as? Activity)?.startActivityForResult(intent, 100)
-  //  } else {
-  //      val startIntent = Intent(context, SafetyFirstVpnService::class.java)
-  //      startIntent.action = SafetyFirstVpnService.ACTION_START
-  //      ContextCompat.startForegroundService(context, startIntent)
-  //  }
-//}
-
 fun startVpn(context: Context) {
-    val activity = context as? Activity
-    if (activity == null) {
-        Log.e("VPN", "Context is not an Activity, cannot request VPN permission")
-        return
-    }
-
-    val prepareIntent = VpnService.prepare(activity)
-    if (prepareIntent != null) {
-        activity.startActivityForResult(prepareIntent, 100)
-    } else {
-        val startIntent = Intent(activity, SafetyFirstVpnService::class.java)
-        startIntent.action = SafetyFirstVpnService.ACTION_START
-        ContextCompat.startForegroundService(activity, startIntent)
-    }
+    val intent = Intent(context, SafetyFirstVpnService::class.java)
+    intent.action = SafetyFirstVpnService.ACTION_START
+    ContextCompat.startForegroundService(context, intent)
 }
 
 fun stopVpn(context: Context) {
-    val stopIntent = Intent(context, SafetyFirstVpnService::class.java)
-    stopIntent.action = SafetyFirstVpnService.ACTION_STOP
-    ContextCompat.startForegroundService(context, stopIntent)
+    val intent = Intent(context, SafetyFirstVpnService::class.java)
+    intent.action = SafetyFirstVpnService.ACTION_STOP
+    ContextCompat.startForegroundService(context, intent)
 }
-//fun stopVpn(context: Context) {
-//    val stopInt = Intent(context, SafetyFirstVpnService::class.java)
-//    stopInt.action = SafetyFirstVpnService.ACTION_STOP
-//    context.startService(stopInt)
-//}
+
+
+fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is android.content.ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
