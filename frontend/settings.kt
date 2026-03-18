@@ -14,16 +14,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun SettingScreen(
+    viewModel: SettingsViewModel = viewModel(),
     DashsClick: () -> Unit,
     ThreatsClick: () -> Unit,
     AboutClick: () -> Unit
@@ -68,21 +73,31 @@ fun SettingScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         // Use a helper function for your blocks
-        SettingBlock(
+        SettingToggleButton(
             title = "VPN Auto-Start",
-            subtitle = "Automatically connect on app launch"
+            description = "Automatically connect on app launch",
+            isSelected = viewModel.vpnAutoStart,
+            onToggle = { viewModel.toggleVpnAutoStart() }
         )
-        SettingBlock(
+        SettingToggleButton(
             title = "Thread Alerts",
-            subtitle = "Get notified of security threats"
+            description = "Get notified of security threats",
+            isSelected = viewModel.threadAlerts,
+            onToggle = { viewModel.toggleThreadAlerts() }
         )
-        SettingBlock(
+
+        SettingToggleButton(
             title = "Connections Updates",
-            subtitle = "VPN connection status changes"
+            description = "VPN connection status changes",
+            isSelected = viewModel.connectionsUpdates,
+            onToggle = { viewModel.toggleConnectionsUpdates() }
         )
-        SettingBlock(
+
+        SettingToggleButton(
             title = "Weekly Reports",
-            subtitle = "Summary of security activity"
+            description = "Summary of security activity",
+            isSelected = viewModel.weeklyReports,
+            onToggle = { viewModel.toggleWeeklyReports() }
         )
         Spacer(modifier = Modifier.weight(1f)) // pushes the next block to the bottom
 
@@ -104,51 +119,39 @@ fun SettingScreen(
 }
 
 
-@Composable
-fun SettingBlock(title: String, subtitle: String) {
-    Column(
-        modifier = Modifier
-            .width(380.dp)
-            .padding(12.dp)
-            .background(Color.LightGray, shape = RoundedCornerShape(10.dp))
-            .border(width = 2.dp, color = Color.Gray, shape = RoundedCornerShape(10.dp))
-            .padding(12.dp)
-    ) {
-        Text(text = title, fontSize = 18.sp)
-        Text(text = subtitle, fontSize = 14.sp)
-    }
-}
 
 @Composable
-fun BlockToggleButton(
+fun SettingToggleButton(
     title: String,
     description: String,
     isSelected: Boolean,
-    onClick: () -> Unit,
+    onToggle: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    Row (
         modifier = modifier
-            .height(80.dp)
-            .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        color = if (isSelected) Color(0xFF6200EE) else Color.LightGray
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 12.dp)
+            .background(Color.LightGray, shape = RoundedCornerShape(10.dp))
+            .border(1.dp, Color.Gray, RoundedCornerShape(10.dp))
+            .padding(horizontal = 12.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.weight(1f) // Text takes all space except the toggle
         ) {
-            Text(
-                text = title,
-                color = if (isSelected) Color.White else Color.Black,
-                fontSize = 16.sp
-            )
+            Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = description,
-                color = if (isSelected) Color.White else Color.DarkGray,
-                fontSize = 12.sp
-            )
+            Text(text = description, fontSize = 14.sp, color = Color.DarkGray)
         }
+
+        Switch(
+            checked = isSelected,
+            onCheckedChange = { onToggle(it) },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color(0xFF6200EE),
+                uncheckedThumbColor = Color.Gray
+            )
+        )
     }
  }
