@@ -34,7 +34,7 @@ import androidx.compose.runtime.collectAsState
 
 @Composable
 fun DashboardScreen(
-    viewModel: LoginsViewModel = viewModel(),
+    viewModel: LoginsViewModel,
     ThreatsClick: () -> Unit,
     SettingsClick: () -> Unit) {
 
@@ -58,23 +58,29 @@ fun DashboardScreen(
                 .fillMaxWidth()
                 .height(350.dp)
         ) {
-            Text(text = if (vpnOn) "VPN Protection: ON" else "VPN Protection: OFF")
+            Text(text = if (vpnOn) "VPN is active and monitoring network traffic." else "Enable VPN protection to monitor network traffic and detect threats.")
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = {
                 if (!vpnOn) {
                     val intent = VpnService.prepare(context)
+
                     if (intent != null){
+                        Log.d("VPN_DEBUG", "Requesting VPN permission")
                         activity?.startActivityForResult(intent, 100)
+
                     } else {
+                        Log.d("VPN_DEBUG", "Already approved, starting VPN")
                         startVpn(context)
                         viewModel.setVpnOn(true)
+
                     }
 
                 } else {
                     stopVpn(context)
                     viewModel.setVpnOn(false)
+
                 }
             }) {
                 Text(if (vpnOn) "Stop VPN" else "Start VPN")
@@ -139,6 +145,7 @@ fun Context.findActivity(): Activity? = when (this) {
     is android.content.ContextWrapper -> baseContext.findActivity()
     else -> null
 }
+
 
 
 

@@ -9,9 +9,11 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -25,13 +27,17 @@ import com.example.cse4550_login.ApiClient.checkDomain
 
 
 class MainActivity : ComponentActivity() {
+    private val vm: LoginsViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
 
-        ApiClient.checkDomain("example.com") { result ->
-            Log.d("API_Test", "Response: $result")
-        }
+//        ApiClient.checkDomain("example.com") { result ->
+//            Log.d("API_Test", "Response: $result")
+//            runOnUiThread {
+//                Toast.makeText(this, "Domain checked: $result", Toast.LENGTH_SHORT).show()
+//            }
+//        }
 
 
         if (Build.VERSION.SDK_INT >= 33) {
@@ -46,8 +52,9 @@ class MainActivity : ComponentActivity() {
             }
         }
         enableEdgeToEdge()
+
         setContent {
-            AppNavigation()
+            AppNavigation(vm)
 
 
         }
@@ -70,13 +77,14 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(viewModel: LoginsViewModel) {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
         startDestination = Routes.DashboardScreen){
         composable(Routes.DashboardScreen){
             DashboardScreen(
+                viewModel = viewModel,
                 ThreatsClick = {
                     navController.navigate(Routes.ThreatsScreen)
                 },
@@ -145,4 +153,27 @@ fun AppNavigation() {
 
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

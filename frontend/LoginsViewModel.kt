@@ -5,6 +5,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class LoginsViewModel : ViewModel() {
     var email by mutableStateOf("")
@@ -18,6 +21,14 @@ class LoginsViewModel : ViewModel() {
         //api
         isLoggedIn = true
     }
+
+    private val _vpnOn = MutableStateFlow(false)
+    val vpnOn: StateFlow<Boolean> = _vpnOn.asStateFlow()
+
+    fun setVpnOn(on: Boolean) {
+        _vpnOn.value = on
+    }
+
     fun register() {
         //api
 
@@ -35,12 +46,6 @@ class LoginsViewModel : ViewModel() {
             registrationState = RegistrationState.Error("Cant be empty")
 
         }
-    }
-    private val _vpnOn = MutableStateFlow(false)
-    val vpnOn: StateFlow<Boolean> = _vpnOn.asStateFlow()
-
-    fun setVpnOn(on: Boolean) {
-        _vpnOn.value = on
     }
 }
 
