@@ -8,7 +8,7 @@ from fcntl import ioctl
 syn = b'E\x00\x00,\x00\x01\x00\x00@\x06\x00\xc4\xc0\x00\x02\x02"\xc2\x95Cx\x0c\x00P\xf4p\x98\x8b\x00\x00\x00\x00`\x02\xff\xff\x18\xc6\x00\x00\x02\x04\x05\xb4'
 
 allcondata = {}
-
+#maps connection peer IPs to a tuple of from (socket, sentpackets), where sentpackets is an array of tuples of form (packet, timestamp)
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
     """
@@ -29,44 +29,29 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                 allcondata[self.request.getpeername()].push((pkt, time.time()))
                 scapy.sendrecv.send(pkt)
             
-
+    def finish(self):
         allcondata.pop(self.request.getpeername())
+        return super().finish()
             
 
-        # self.request is the TCP socket connected to the client
-       """
-       print("opening tunnel")
-        print("writing tunnel")
-        self.data = self.request.recv(1024)
-        print(self.data[-1])
-        if self.data[-1] == 10:
-            self.data = self.data[:-1]
-        print(self.data.hex(sep=":"))
-        tun.send(self.data)
-        print("reading tunnel")
-        reply = tun.recv(1024)
-        print("done reading?")
-
-        print(f"Received from {self.client_address[0]}:")
-        print(self.data.decode("utf-8"))
-        # just send back the same data, but upper-cased
- #       self.request.sendall(reply)
-        # after we return, the socket will be closed.
-    """
 
 def pkt_callback(pkt):
-    for userconnection in allcondata.copy():
-        for sentpackettup in userconnection[1]:
-            if pkt.answers(sendpacket[0]):
-                sentpackettup = (sentpackettup[0], time.time())
-                iplayer = pkt.getlayer(scapy.layers.inet.IP)
-                packetbytes = bytes(iplayer)
-                userconnection[0].send(len)
+    for connectionPeerName in allcondata.keys():
+        connectionSocket = allcondata[connectionPeerName][0]
+        connectionData = allcondata[connectionPeerName][1]
+        for sentpacketIndex in range(len(connectionData)):
+            sentpacket = connectionData[sentpacketIndex]
+            if pkt.answers(sentpacket):
+                connectionData[sentpacketIndex] = (sentpacket, time.time())
+                ipLayer = pkt.getlayer(scapy.layers.inet.IP)
+                packetBytes = bytes(ipLayer)
+                lenAsBytes = len(packetBytes).to_bytes(2)
+                connectionSocket.send(lenAsBytes + packetBytes)
 
 if __name__ == "__main__":
     HOST, PORT = "172.17.0.4", 9999
-    scapy.sendrecv.sniff(iface:"eth0", prn=pkt_callback, store=0)
-    # Create the server, binding to localhost on port 9999
+    scapy.sendrecv.sniff(iface="eth0", prn=pkt_callback, store=0)
+    # Create the server, binding to eth0 (172.17.0.4) on port 9999
     with socketserver.TCPServer((HOST, PORT), MyTCPHandler) as server:
         # Activate the server; this will keep running until you
         # interrupt the program with Ctrl-C
