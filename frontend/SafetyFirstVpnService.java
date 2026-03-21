@@ -95,7 +95,6 @@ public class SafetyFirstVpnService extends VpnService {
         Builder builder = new Builder()
                 .setSession("SafetyFirst VPN")
                 .addAddress("0.0.0.0", 0);
-//                .addRoute("0.0.0.0", 0);
 
         vpnInterface = builder.establish();
         if (vpnInterface == null) {
