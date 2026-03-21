@@ -15,12 +15,9 @@ import androidx.core.app.NotificationCompat;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 
-import kotlin.text.HexFormat;
 
 public class SafetyFirstVpnService extends VpnService {
 
@@ -36,6 +33,7 @@ public class SafetyFirstVpnService extends VpnService {
     private ParcelFileDescriptor vpnInterface;
 
     private boolean isOn;
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null || intent.getAction() == null) return START_STICKY;
@@ -98,15 +96,30 @@ public class SafetyFirstVpnService extends VpnService {
         vpnInterface = builder.setSession("SafetyFirst VPN")
                 .addAddress("192.168.2.2", 24)
                 .addRoute("0.0.0.0", 0)
+                .setMtu(1000)
                 .establish();
         if (vpnInterface == null) {
             Log.e(TAG, "Failed to establish VPN. Permission denied or another VPN active.");
         } else {
             Log.d(TAG, "VPN established ");
         }
-        new Thread(() -> {
-                runsocket(vpnInterface);
-        }).start();
+
+
+
+            new Thread(() -> {
+                try (java.net.Socket socket = new java.net.Socket("4.154.154.5", 9999)) {
+
+                    socket.setTcpNoDelay(true);
+                    socket.setReceiveBufferSize(2048);
+                    socket.setSendBufferSize(256);
+                    protect(socket);
+                    runsocket(vpnInterface.getFileDescriptor(), socket);
+                } catch (java.io.IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }).start();
+
     }
 
     private void stopVpn() {
@@ -138,17 +151,45 @@ public class SafetyFirstVpnService extends VpnService {
         }
     }
 
-    private void runsocket(ParcelFileDescriptor file){
+    private void runsocket(FileDescriptor fd, java.net.Socket socket) {
         try {
-            java.net.Socket socket = new java.net.Socket("4.154.154.5", 9999);
+
             Log.d("TCP_TEST", "Connected to gateway!");
 
-            FileDescriptor fd = file.getFileDescriptor();
             InputStream fileInput = new FileInputStream(fd);
             OutputStream fileOutput = new FileOutputStream(fd);
             InputStream tunnelInput = socket.getInputStream();
             OutputStream tunnelOutput = socket.getOutputStream();
+            String icmpPacketString = "00 1E 45 00 00 1C 00 01 00 00 40 01 BE BB AC 11 00 04 08 08 08 08 08 00 F7 FF 00 00 00 00".replace(" ", "");
+            Log.i("ICMP_TEST", "a1: " + icmpPacketString);
+            byte[] icmpPacketBytes = new byte[icmpPacketString.length()/2];
+            int index = 0;
+            while (!icmpPacketString.isEmpty()) {
+                String onebytestring = icmpPacketString.substring(0,2);
 
+                icmpPacketBytes[index] = Integer.valueOf(onebytestring, 16).byteValue();
+                icmpPacketString = icmpPacketString.substring(2);
+                index++;
+            }
+
+            /*
+            for (int i = 0; i<3; i++) {
+                Log.i("ICMP_TEST", "e1: " + i);
+
+                Log.i("ICMP_TEST", "result A: " + Arrays.toString(icmpPacketBytes));
+                tunnelOutput.write(icmpPacketBytes);
+                tunnelOutput.flush();
+
+                Log.i("ICMP_TEST", "e2: " + i);
+                byte[] prebuffer = new byte[128];
+                tunnelInput.read(prebuffer, 0, 128);
+                Log.i("ICMP_TEST", "result B" + Arrays.toString(prebuffer));
+                Thread.sleep(1000);
+                Log.i("ICMP_TEST", "e3: " + i);
+
+            }
+            */
+            tunnelOutput.write(icmpPacketBytes);
 
             while (isOn){
                 byte[] buffer = new byte[2048];
@@ -170,17 +211,17 @@ public class SafetyFirstVpnService extends VpnService {
                     StringBuilder sb = new StringBuilder();
                     sb.append("[");
                     for (int i = 0; i<length-1; i++){
-                        sb.append(String.format("%02x", buffer[i]));
+                        sb.append(String.format("%02x", newbuffer[i]));
                         sb.append(", ");
                     }
-                    sb.append(String.format("%02x", buffer[length-1]));
+                    sb.append(String.format("%02x", newbuffer[length-1]));
                     sb.append("]");
-                    Log.d("TCP_TEST", "Wrote: " + sb);
-                    Log.d("TCP_TEST", "file-to-tunnel complete!");
+                    Log.d("TCP_TEST", "file-to-tunnel Wrote: " + sb);
                 }
                 buffer = new byte[2048];
                 byte[] lengthbuffer = new byte[2];
 
+                Log.d("TCP_TEST", "tunnel-to-file " +tunnelInput.available());
                 if (tunnelInput.available() > 2) {
                     length = tunnelInput.read(lengthbuffer, 0, 2);
                     Log.d("TCP_TEST", "read tunnel");
@@ -193,13 +234,16 @@ public class SafetyFirstVpnService extends VpnService {
                         Log.d("TCP_TEST", "tunnel-to-file Complete!");
                     }
                 }
-                Thread.sleep(500);
+                Thread.sleep(200);
             }
+
+
             socket.close();
+
         } catch (Exception e) {
             Log.e("TCP_TEST", "Connection failed: " + e.getMessage());
+
+
         }
-
-
     }
 }
