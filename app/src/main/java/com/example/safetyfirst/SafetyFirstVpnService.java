@@ -4,7 +4,12 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.IpPrefix;
+import android.net.Network;
+import android.net.NetworkRequest;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
@@ -17,9 +22,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.net.InetAddress;
 
 
-public class SafetyFirstVpnService extends VpnService {
+public class SafetyFirstVpnService extends VpnService{
 
     private static final String TAG = "SafetyFirstVpnService";
 
@@ -30,20 +38,23 @@ public class SafetyFirstVpnService extends VpnService {
 
     private static final int FOREGROUND_ID = 1;
 
+    private static ConnectivityManager connectivityManager;
+
     private ParcelFileDescriptor vpnInterface;
 
     private boolean isOn;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        connectivityManager = getSystemService(ConnectivityManager.class);
         if (intent == null || intent.getAction() == null) return START_STICKY;
 
         String action = intent.getAction();
         Log.d(TAG, "onStartCommand action=" + action);
 
         if (ACTION_START.equals(action)) {
-            // Must happen immediately for a foreground service
             isOn = true;
+            // Must happen immediately for a foreground service
             updateForegroundNotification("Protection is ON");
             Log.d("SafetyFirstVpnService", "establishing");
             establishMinimalVpn();
@@ -75,51 +86,54 @@ public class SafetyFirstVpnService extends VpnService {
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setContentIntent(pi)
                 .build();
-        if (android.os.Build.VERSION.SDK_INT >= 29) {
-            startForeground(
-                    FOREGROUND_ID,
-                    notification,
-                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-            );
-        } else {
-            startForeground(FOREGROUND_ID, notification);
-        }
+
+        startForeground(
+                FOREGROUND_ID,
+                notification,
+                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+        );
         startForeground(FOREGROUND_ID, notification);
         Log.d(TAG, "startForeground called");
     }
+    protected void establishMinimalVpn(){
+        try {
+            if (vpnInterface != null) return;
 
-    private void establishMinimalVpn() {
-        if (vpnInterface != null) return;
+            Builder builder = new Builder();
 
-        Builder builder = new Builder();
-
-        vpnInterface = builder.setSession("SafetyFirst VPN")
-                .addAddress("192.168.2.2", 24)
-                .addRoute("0.0.0.0", 0)
-                .setMtu(1000)
-                .establish();
-        if (vpnInterface == null) {
-            Log.e(TAG, "Failed to establish VPN. Permission denied or another VPN active.");
-        } else {
-            Log.d(TAG, "VPN established ");
-        }
-
+            vpnInterface = builder.setSession("SafetyFirst VPN")
+                    .addAddress("192.168.2.0", 24) //bind to an available address in the 192.168.2 range
+                    .addRoute("0.0.0.0", 0) //accept all traffic to start
+                    .excludeRoute(new IpPrefix(InetAddress.getByAddress(new byte[]{(byte) 192, (byte) 168, 2, 0}), 24)) //dont accept traffic that's supposed to go to the network device
+                    .setMtu(1000)
+                    .establish();
+            if (vpnInterface == null) {
+                Log.e(TAG, "Failed to establish VPN. Permission denied or another VPN active.");
+            } else {
+                Log.d(TAG, "VPN established ");
+            }
 
 
             new Thread(() -> {
-                try (java.net.Socket socket = new java.net.Socket("4.154.154.5", 9999)) {
-
+                try  {
+                    java.net.Socket socket = new java.net.Socket();
                     socket.setTcpNoDelay(true);
                     socket.setReceiveBufferSize(2048);
-                    socket.setSendBufferSize(256);
+                    socket.setSendBufferSize(2048);
                     protect(socket);
+                    connectivityManager.getActiveNetwork().bindSocket(socket);
+                    setUnderlyingNetworks(new Network[] {connectivityManager.getActiveNetwork()});
+                    socket.connect(new java.net.InetSocketAddress("4.154.154.5", 9999));
                     runsocket(vpnInterface.getFileDescriptor(), socket);
                 } catch (java.io.IOException e) {
                     throw new RuntimeException(e);
                 }
 
             }).start();
-
+        }
+        catch (UnknownHostException e){
+            Log.e(TAG, "UnknownHostException somehow the laws of nature broke and the constant ip address is no longer the correct length", e);
+        }
     }
 
     private void stopVpn() {
@@ -133,22 +147,20 @@ public class SafetyFirstVpnService extends VpnService {
             Log.e(TAG, "Error closing vpnInterface", e);
         }
 
-        stopForeground(true);
+        stopForeground(STOP_FOREGROUND_REMOVE);
         stopSelf();
     }
 
     private void createChannelIfNeeded() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "VPN Status",
-                    NotificationManager.IMPORTANCE_LOW
-            );
-            channel.setShowBadge(false);
+        NotificationChannel channel = new NotificationChannel(
+                CHANNEL_ID,
+                "VPN Status",
+                NotificationManager.IMPORTANCE_LOW
+        );
+        channel.setShowBadge(false);
 
-            NotificationManager nm = getSystemService(NotificationManager.class);
-            if (nm != null) nm.createNotificationChannel(channel);
-        }
+        NotificationManager nm = getSystemService(NotificationManager.class);
+        if (nm != null) nm.createNotificationChannel(channel);
     }
 
     private void runsocket(FileDescriptor fd, java.net.Socket socket) {
@@ -156,14 +168,22 @@ public class SafetyFirstVpnService extends VpnService {
 
             Log.d("TCP_TEST", "Connected to gateway!");
 
+            //create inputs and outputs for the file (vpn interface) and the tunnel (TCP socket to server)
             InputStream fileInput = new FileInputStream(fd);
             OutputStream fileOutput = new FileOutputStream(fd);
             InputStream tunnelInput = socket.getInputStream();
             OutputStream tunnelOutput = socket.getOutputStream();
+
+            byte[] hellobytes = {(byte) 81, (byte) 41 } ;
+            tunnelOutput.write(hellobytes);
+
+            //string of a standard ICMP packet pinging 8.8.8.8 for testing the tunnel
             String icmpPacketString = "00 1E 45 00 00 1C 00 01 00 00 40 01 BE BB AC 11 00 04 08 08 08 08 08 00 F7 FF 00 00 00 00".replace(" ", "");
             Log.i("ICMP_TEST", "a1: " + icmpPacketString);
             byte[] icmpPacketBytes = new byte[icmpPacketString.length()/2];
             int index = 0;
+
+            //convert the string into bytes
             while (!icmpPacketString.isEmpty()) {
                 String onebytestring = icmpPacketString.substring(0,2);
 
@@ -172,8 +192,7 @@ public class SafetyFirstVpnService extends VpnService {
                 index++;
             }
 
-            /*
-            for (int i = 0; i<3; i++) {
+            for (int i = 0; i<1; i++) {
                 Log.i("ICMP_TEST", "e1: " + i);
 
                 Log.i("ICMP_TEST", "result A: " + Arrays.toString(icmpPacketBytes));
@@ -188,26 +207,30 @@ public class SafetyFirstVpnService extends VpnService {
                 Log.i("ICMP_TEST", "e3: " + i);
 
             }
-            */
-            tunnelOutput.write(icmpPacketBytes);
-
             while (isOn){
+                boolean didanything = false;
                 byte[] buffer = new byte[2048];
-
-
                 int length;
 
+                //read packets from file
                 length = fileInput.read(buffer, 0, 2048);
                 if (length > 0) {
+                    didanything = true;
                     Log.d("TCP_TEST", "file-to-tunnel Length: " + length);
+                    //turn the length of the packet into a 2 byte prefix
                     byte lengthHigh = (byte) (length / 256);
                     byte lengthLow = (byte) (length % 256);
                     byte[] newbuffer = new byte[2048+2];
                     newbuffer[0] = lengthHigh;
                     newbuffer[1] = lengthLow;
+
+                    //copy the body of the packet into the rest of the buffer
                     System.arraycopy(buffer, 0, newbuffer, 2, 2048);
-                    tunnelOutput.write(newbuffer, 0, length);
+
+                    //write packet
+                    tunnelOutput.write(newbuffer, 0, length + 2);
                     tunnelOutput.flush();
+
                     StringBuilder sb = new StringBuilder();
                     sb.append("[");
                     for (int i = 0; i<length-1; i++){
@@ -218,23 +241,44 @@ public class SafetyFirstVpnService extends VpnService {
                     sb.append("]");
                     Log.d("TCP_TEST", "file-to-tunnel Wrote: " + sb);
                 }
+                //clear buffers
                 buffer = new byte[2048];
                 byte[] lengthbuffer = new byte[2];
 
-                Log.d("TCP_TEST", "tunnel-to-file " +tunnelInput.available());
-                if (tunnelInput.available() > 2) {
+                //check for packets from tunnel
+                if (tunnelInput.available() >= 2) {
+                    Log.d("TCP_TEST", "tunnel-to-file available: " + tunnelInput.available());
+                    didanything = true;
+
+                    //read the 2 byte length prefix
                     length = tunnelInput.read(lengthbuffer, 0, 2);
                     Log.d("TCP_TEST", "read tunnel");
                     if (length > 0) {
                         int packetlength = lengthbuffer[0] * 256 + lengthbuffer[1];
-                        Log.d("TCP_TEST", "tunnel-to-file Length: " + length);
-                        length = tunnelInput.read(buffer, 0, packetlength);
+                        Log.d("TCP_TEST", "tunnel-to-file Prefix Length: " + length + ", payload length: " + packetlength);
+
+                        //read the body of the payload of length taken from prefix
+                        int readlength = tunnelInput.read(buffer, 0, packetlength);
+
+                        //probably should move to helper function for logging
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("[");
+                        for (int i = 0; i<packetlength-1; i++){
+                            sb.append(String.format("%02x", buffer[i]));
+                            sb.append(", ");
+                        }
+                        sb.append(String.format("%02x", buffer[packetlength-1]));
+                        sb.append("]");
+
+                        Log.d("TCP_TEST", "tunnel-to-file Wrote: " + sb);
                         fileOutput.write(buffer, 0, packetlength);
                         fileOutput.flush();
                         Log.d("TCP_TEST", "tunnel-to-file Complete!");
                     }
                 }
-                Thread.sleep(200);
+                if (!didanything){
+                    Thread.sleep(50);
+                }
             }
 
 
