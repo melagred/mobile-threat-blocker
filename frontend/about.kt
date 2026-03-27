@@ -119,7 +119,7 @@ fun AboutScreen(
         }
 
     }
-import androidx.compose.foundation.background
+//import androidx.compose.foundation.background
 //import androidx.compose.foundation.border
 //import androidx.compose.foundation.layout.Arrangement
 //import androidx.compose.foundation.layout.Box
@@ -136,6 +136,7 @@ import androidx.compose.foundation.background
 //import androidx.compose.foundation.shape.RoundedCornerShape
 //import androidx.compose.foundation.verticalScroll
 //import androidx.compose.material3.Button
+//import androidx.compose.material3.ButtonDefaults
 //import androidx.compose.material3.Text
 //import androidx.compose.runtime.Composable
 //import androidx.compose.ui.Alignment
@@ -154,7 +155,7 @@ import androidx.compose.foundation.background
 //    Column(
 //        modifier = Modifier
 //            .background(Color.LightGray)
-//            .background(Color(0xFF415285))
+//            .background(Color(0xFFC0C0C0))
 //            .fillMaxSize()
 //    ) {
 //        Spacer(modifier = Modifier.height(40.dp))
@@ -171,14 +172,22 @@ import androidx.compose.foundation.background
 //            Button(
 //                onClick = SettingsClick,
 //                shape = RoundedCornerShape(16.dp),
-//                modifier = Modifier.width(150.dp)
+//                modifier = Modifier.width(150.dp),
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )
 //            ) {
 //                Text(text = "General")
 //            }
 //            Button(
 //                onClick = {},
 //                shape = RoundedCornerShape(16.dp),
-//                modifier = Modifier.width(150.dp)
+//                modifier = Modifier.width(150.dp),
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )
 //            ) {
 //                Text(text = "About")
 //            }
