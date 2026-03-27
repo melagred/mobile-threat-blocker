@@ -179,6 +179,7 @@ fun Context.findActivity(): Activity? = when (this) {
 //import androidx.compose.material3.Icon
 //import androidx.compose.foundation.Image
 //import androidx.compose.foundation.layout.*
+//import androidx.compose.material3.ButtonDefaults
 //import androidx.compose.ui.res.painterResource
 //import androidx.compose.ui.Alignment
 //
@@ -196,7 +197,7 @@ fun Context.findActivity(): Activity? = when (this) {
 //
 //    Column(modifier = Modifier
 //
-//        .background(Color(0xFF415285))
+//        .background(Color(0xFFC0C0C0))
 //        .fillMaxSize()
 //        ) {
 //        Spacer(modifier = Modifier.padding(10.dp))
@@ -223,7 +224,7 @@ fun Context.findActivity(): Activity? = when (this) {
 //            Text(
 //                text = "Welcome to Safety First",
 //                fontSize = 20.sp,
-//                color = Color.White
+//                color = Color(0xFF2F3E63)
 //            )
 //        }
 //        Column(
@@ -244,7 +245,7 @@ fun Context.findActivity(): Activity? = when (this) {
 //                        Color(0xFF2F3E63),
 //                        shape = RoundedCornerShape(24.dp)
 //                    )
-//                    .padding(24.dp), 
+//                    .padding(24.dp),
 //                contentAlignment = Alignment.Center
 //            ) {
 //
@@ -278,6 +279,9 @@ fun Context.findActivity(): Activity? = when (this) {
 //                                viewModel.setVpnOn(false)
 //                            }
 //                        },
+//                        colors = ButtonDefaults.buttonColors(
+//                            containerColor = Color(0xFF6C8ED9),
+//                            contentColor = Color.White),
 //                        shape = RoundedCornerShape(40.dp),
 //                        modifier = Modifier
 //                            .height(80.dp)
@@ -303,7 +307,7 @@ fun Context.findActivity(): Activity? = when (this) {
 //                        else
 //                            "Status: VPN is off",
 //                        fontSize = 18.sp,
-//                        color = Color.LightGray
+//                        color = Color.White
 //                    )
 //                }
 //            }
@@ -328,15 +332,27 @@ fun Context.findActivity(): Activity? = when (this) {
 //            modifier = Modifier
 //                .fillMaxWidth()
 //                .background(Color.LightGray)
-//                .background(Color(0xFF415285))
+//                .background(Color(0xFF2F3E63))
 //                .padding(8.dp),
 //            horizontalArrangement = Arrangement.SpaceEvenly
 //        ) {
-//            Button(onClick = {}) {
+//            Button(onClick = {},
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )) {
 //                Text("Dashboard")}
-//            Button(onClick =  ThreatsClick ) {
+//            Button(onClick =  ThreatsClick,
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )) {
 //                Text("Threats")}
-//            Button(onClick = SettingsClick) {
+//            Button(onClick = SettingsClick,
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )) {
 //                Text("Settings")}
 //        }
 //    }
@@ -361,9 +377,6 @@ fun Context.findActivity(): Activity? = when (this) {
 //    is android.content.ContextWrapper -> baseContext.findActivity()
 //    else -> null
 //}
-
-
-
 
 
 
