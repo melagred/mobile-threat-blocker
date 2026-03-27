@@ -144,6 +144,8 @@ fun AboutScreen(
 //import androidx.compose.ui.graphics.Color
 //import androidx.compose.ui.unit.dp
 //import androidx.compose.ui.unit.sp
+//import androidx.compose.ui.text.font.FontWeight
+//
 //
 //@Composable
 //
@@ -161,7 +163,9 @@ fun AboutScreen(
 //        Spacer(modifier = Modifier.height(40.dp))
 //        Text(
 //            text = "Terms of service",
-//            fontSize = 20.sp
+//            fontSize = 20.sp,
+//            fontWeight = FontWeight.Bold,
+//            color = Color(0xFF2F3E63)
 //        )
 //        Spacer(modifier = Modifier.height(30.dp))
 //
