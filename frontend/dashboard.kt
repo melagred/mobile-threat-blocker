@@ -182,6 +182,7 @@ fun Context.findActivity(): Activity? = when (this) {
 //import androidx.compose.material3.ButtonDefaults
 //import androidx.compose.ui.res.painterResource
 //import androidx.compose.ui.Alignment
+//import androidx.compose.ui.text.font.FontWeight
 //
 //
 //@Composable
@@ -224,6 +225,7 @@ fun Context.findActivity(): Activity? = when (this) {
 //            Text(
 //                text = "Welcome to Safety First",
 //                fontSize = 20.sp,
+//                fontWeight = FontWeight.Bold,
 //                color = Color(0xFF2F3E63)
 //            )
 //        }
