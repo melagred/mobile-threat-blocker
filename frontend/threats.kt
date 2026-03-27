@@ -149,6 +149,7 @@ fun ThreatsScreen(
 //import androidx.compose.foundation.layout.width
 //import androidx.compose.foundation.shape.RoundedCornerShape
 //import androidx.compose.material3.Button
+//import androidx.compose.material3.ButtonDefaults
 //import androidx.compose.material3.Text
 //import androidx.compose.material3.TextButton
 //import androidx.compose.runtime.Composable
@@ -170,18 +171,20 @@ fun ThreatsScreen(
 //    Column(
 //        modifier = Modifier
 //            .background(Color.LightGray)
-//            .background(Color(0xFF415285))
+//            .background(Color(0xFFC0C0C0))
 //            .fillMaxSize()
 //    )
 //    {
 //        Spacer(modifier = Modifier.padding(40.dp))
 //        Text(
 //            text = "Detected Threats",
-//            fontSize = 20.sp
+//            fontSize = 20.sp,
+//            color = Color(0xFF2F3E63)
 //        )
 //        Text(
 //            text = "Security incidents on your device",
-//            fontSize = 12.sp
+//            fontSize = 14.sp,
+//            color = Color(0xFF2F3E63)
 //        )
 //        Column(
 //            modifier = Modifier
@@ -234,10 +237,18 @@ fun ThreatsScreen(
 //                horizontalArrangement = Arrangement.SpaceEvenly,
 //                verticalAlignment = Alignment.CenterVertically
 //            ) {
-//                Button(onClick = ThreatsLogClick) {
+//                Button(onClick = ThreatsLogClick,
+//                    colors = ButtonDefaults.buttonColors(
+//                        containerColor = Color(0xFF2F3E63),
+//                        contentColor = Color.White
+//                    )) {
 //                    Text(text = "View Log")
 //                }
-//                Button(onClick = {}) {
+//                Button(onClick = {},
+//                    colors = ButtonDefaults.buttonColors(
+//                        containerColor = Color(0xFF2F3E63),
+//                        contentColor = Color.White
+//                    )) {
 //                    Text(text = "Log summary")
 //                }
 //            }
@@ -258,19 +269,33 @@ fun ThreatsScreen(
 //        Row(
 //            modifier = Modifier
 //                .fillMaxWidth()
-//                .background(Color(0xFF415285))
+//                .background(Color(0xFF2F3E63))
 //                .padding(8.dp),
 //            horizontalArrangement = Arrangement.SpaceEvenly
 //        ) {
-//            Button(onClick = DashsClick) {
+//            Button(onClick = DashsClick,
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )) {
 //                Text("Dashboard")
 //            }
-//            Button(onClick = ThreatsClick) {
+//            Button(onClick = ThreatsClick,
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )) {
 //                Text("Threats")
 //            }
-//            Button(onClick = SettingsClick) {
+//            Button(onClick = SettingsClick,
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )) {
 //                Text("Settings")
 //            }
 //        }
 //    }
 //
+//
+//}
