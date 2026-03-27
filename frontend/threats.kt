@@ -159,6 +159,8 @@ fun ThreatsScreen(
 //import androidx.compose.ui.unit.dp
 //import androidx.compose.ui.unit.sp
 //import androidx.lifecycle.viewmodel.compose.viewModel
+//import androidx.compose.ui.text.font.FontWeight
+//
 //
 //@Composable
 //fun ThreatsScreen(
@@ -179,11 +181,13 @@ fun ThreatsScreen(
 //        Text(
 //            text = "Detected Threats",
 //            fontSize = 20.sp,
+//            fontWeight = FontWeight.Bold,
 //            color = Color(0xFF2F3E63)
 //        )
 //        Text(
 //            text = "Security incidents on your device",
 //            fontSize = 14.sp,
+//            fontWeight = FontWeight.Bold,
 //            color = Color(0xFF2F3E63)
 //        )
 //        Column(
