@@ -157,7 +157,7 @@ fun SettingToggleButton(
  }
 
 
-//import androidx.compose.foundation.background
+import androidx.compose.foundation.background
 //import androidx.compose.foundation.border
 //import androidx.compose.foundation.clickable
 //import androidx.compose.foundation.layout.Arrangement
@@ -171,6 +171,7 @@ fun SettingToggleButton(
 //import androidx.compose.foundation.layout.width
 //import androidx.compose.foundation.shape.RoundedCornerShape
 //import androidx.compose.material3.Button
+//import androidx.compose.material3.ButtonDefaults
 //import androidx.compose.material3.Switch
 //import androidx.compose.material3.SwitchDefaults
 //import androidx.compose.material3.Text
@@ -193,18 +194,20 @@ fun SettingToggleButton(
 //    Column(
 //        modifier = Modifier
 //            .background(Color.LightGray)
-//            .background(Color(0xFF415285))
+//            .background(Color(0xFFC0C0C0))
 //            .fillMaxSize()
 //            .padding(horizontal = 16.dp, vertical = 0.dp)
 //    ) {
 //        Spacer(modifier = Modifier.height(40.dp))
 //        Text(
 //            text = "Settings",
-//            fontSize = 20.sp
+//            fontSize = 20.sp,
+//            color = Color(0xFF2F3E63)
 //        )
 //        Text(
 //            text = "Customize your security preference",
-//            fontSize = 12.sp
+//            fontSize = 12.sp,
+//            color = Color(0xFF2F3E63)
 //        )
 //
 //        Spacer(modifier = Modifier.height(16.dp))
@@ -216,14 +219,22 @@ fun SettingToggleButton(
 //            Button(
 //                onClick = {},
 //                shape = RoundedCornerShape(16.dp),
-//                modifier = Modifier.width(150.dp)
+//                modifier = Modifier.width(150.dp),
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )
 //            ) {
 //                Text(text = "General")
 //            }
 //            Button(
 //                onClick = AboutClick,
 //                shape = RoundedCornerShape(16.dp),
-//                modifier = Modifier.width(150.dp)
+//                modifier = Modifier.width(150.dp),
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )
 //            ) {
 //                Text(text = "About")
 //            }
@@ -264,15 +275,27 @@ fun SettingToggleButton(
 //            modifier = Modifier
 //                .fillMaxWidth()
 //                .background(Color.LightGray)
-//                .background(Color(0xFF415285))
+//                .background(Color(0xFF2F3E63))
 //                .padding(8.dp),
 //            horizontalArrangement = Arrangement.SpaceEvenly
 //        ) {
-//            Button(onClick = DashsClick) {
+//            Button(onClick = DashsClick,
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )) {
 //                Text("Dashboard")}
-//            Button(onClick =  ThreatsClick ) {
+//            Button(onClick =  ThreatsClick,
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )) {
 //                Text("Threats")}
-//            Button(onClick = {}) {
+//            Button(onClick = {},
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )) {
 //                Text("Settings")}
 //        }
 //    }
@@ -302,20 +325,20 @@ fun SettingToggleButton(
 //        ) {
 //            Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
 //            Spacer(modifier = Modifier.height(4.dp))
-//            Text(text = description, fontSize = 14.sp, color = Color.DarkGray)
+//            Text(text = description, fontSize = 14.sp, color = Color(0xFF2F3E63))
 //        }
 //
 //        Switch(
 //            checked = isSelected,
 //            onCheckedChange = { onToggle(it) },
 //            colors = SwitchDefaults.colors(
-//                checkedThumbColor = Color(0xFF6200EE),
+//                checkedThumbColor = Color(0xFFC0C0C0),
+//                checkedTrackColor = Color(0xFF2F3E63),
 //                uncheckedThumbColor = Color.Gray
 //            )
 //        )
 //    }
 //}
-
 
 
 
