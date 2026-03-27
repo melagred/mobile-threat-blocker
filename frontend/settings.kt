@@ -209,7 +209,7 @@ import androidx.compose.foundation.background
 //        )
 //        Text(
 //            text = "Customize your security preference",
-//            fontSize = 12.sp,
+//            fontSize = 14.sp,
 //            fontWeight = FontWeight.Bold,
 //            color = Color(0xFF2F3E63)
 //        )
