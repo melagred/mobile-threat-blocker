@@ -183,6 +183,8 @@ import androidx.compose.foundation.background
 //import androidx.compose.ui.unit.dp
 //import androidx.compose.ui.unit.sp
 //import androidx.lifecycle.viewmodel.compose.viewModel
+//import androidx.compose.ui.text.font.FontWeight
+//
 //
 //@Composable
 //fun SettingScreen(
@@ -202,11 +204,13 @@ import androidx.compose.foundation.background
 //        Text(
 //            text = "Settings",
 //            fontSize = 20.sp,
+//            fontWeight = FontWeight.Bold,
 //            color = Color(0xFF2F3E63)
 //        )
 //        Text(
 //            text = "Customize your security preference",
 //            fontSize = 12.sp,
+//            fontWeight = FontWeight.Bold,
 //            color = Color(0xFF2F3E63)
 //        )
 //
