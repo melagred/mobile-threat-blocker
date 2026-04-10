@@ -86,12 +86,6 @@ public class SafetyFirstVpnService extends VpnService{
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setContentIntent(pi)
                 .build();
-
-        startForeground(
-                FOREGROUND_ID,
-                notification,
-                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-        );
         startForeground(FOREGROUND_ID, notification);
         Log.d(TAG, "startForeground called");
     }
@@ -102,10 +96,9 @@ public class SafetyFirstVpnService extends VpnService{
             Builder builder = new Builder();
 
             vpnInterface = builder.setSession("SafetyFirst VPN")
-                    .addAddress("192.168.2.0", 24) //bind to an available address in the 192.168.2 range
+                    .addAddress("10.0.0.2", 32) //bind to an available address in the 192.168.2 range
                     .addRoute("0.0.0.0", 0) //accept all traffic to start
-                    .excludeRoute(new IpPrefix(InetAddress.getByAddress(new byte[]{(byte) 192, (byte) 168, 2, 0}), 24)) //dont accept traffic that's supposed to go to the network device
-                    .setMtu(1000)
+                    .setMtu(1500)
                     .establish();
             if (vpnInterface == null) {
                 Log.e(TAG, "Failed to establish VPN. Permission denied or another VPN active.");
@@ -131,8 +124,8 @@ public class SafetyFirstVpnService extends VpnService{
 
             }).start();
         }
-        catch (UnknownHostException e){
-            Log.e(TAG, "UnknownHostException somehow the laws of nature broke and the constant ip address is no longer the correct length", e);
+        catch (Exception e) {
+            Log.e(TAG, "Failed to establish VPN or start socket thread", e);
         }
     }
 
@@ -225,7 +218,7 @@ public class SafetyFirstVpnService extends VpnService{
                     newbuffer[1] = lengthLow;
 
                     //copy the body of the packet into the rest of the buffer
-                    System.arraycopy(buffer, 0, newbuffer, 2, 2048);
+                    System.arraycopy(buffer, 0, newbuffer, 2, length);
 
                     //write packet
                     tunnelOutput.write(newbuffer, 0, length + 2);
@@ -254,7 +247,7 @@ public class SafetyFirstVpnService extends VpnService{
                     length = tunnelInput.read(lengthbuffer, 0, 2);
                     Log.d("TCP_TEST", "read tunnel");
                     if (length > 0) {
-                        int packetlength = lengthbuffer[0] * 256 + lengthbuffer[1];
+                        int packetlength = ((lengthbuffer[0] & 0xFF) << 8) | (lengthbuffer[1] & 0xFF);
                         Log.d("TCP_TEST", "tunnel-to-file Prefix Length: " + length + ", payload length: " + packetlength);
 
                         //read the body of the payload of length taken from prefix
