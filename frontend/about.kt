@@ -154,6 +154,7 @@ fun AboutScreen(
 //    ThreatsClick: () -> Unit,
 //    SettingsClick: () -> Unit
 //) {
+//    val scrollState = rememberScrollState()
 //    Column(
 //        modifier = Modifier
 //            .background(Color.LightGray)
@@ -163,11 +164,11 @@ fun AboutScreen(
 //        Spacer(modifier = Modifier.height(40.dp))
 //        Text(
 //            text = "Terms of service",
-//            fontSize = 20.sp,
+//            fontSize = 25.sp,
 //            fontWeight = FontWeight.Bold,
 //            color = Color(0xFF2F3E63)
 //        )
-//        Spacer(modifier = Modifier.height(30.dp))
+//        Spacer(modifier = Modifier.height(20.dp))
 //
 //        Row(
 //            modifier = Modifier.fillMaxWidth(),
@@ -197,26 +198,26 @@ fun AboutScreen(
 //            }
 //        }
 //
-//
-//        val scrollState = rememberScrollState()
+//        Spacer(modifier = Modifier.height(20.dp))
 //
 //        Box(
 //            modifier = Modifier
-//                .fillMaxSize(),
-//            contentAlignment = Alignment.Center
+//                .weight(1f)
+//                .fillMaxWidth()
+//                .padding(horizontal = 20.dp)
+//                .padding(bottom = 20.dp)
+//
 //        ) {
 //            Box(
 //                modifier = Modifier
-//                    .width(300.dp)
-//                    .height(200.dp)
+//                    .fillMaxSize()
 //                    .background(Color.LightGray, shape = RoundedCornerShape(12.dp))
 //                    .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
 //                    .padding(12.dp)
 //            ) {
 //                Column(
 //                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .heightIn(min = 0.dp, max = 200.dp)
+//                        .fillMaxSize()
 //                        .verticalScroll(scrollState)
 //
 //                ) {
@@ -232,23 +233,31 @@ fun AboutScreen(
 //        }
 //
 //
-//        Spacer(modifier = Modifier.weight(1f))
 //        Row(
 //            modifier = Modifier
 //                .fillMaxWidth()
-//                .background(Color(0xFF415285))
+//                .background(Color(0xFF2F3E63))
 //                .padding(8.dp),
 //            horizontalArrangement = Arrangement.SpaceEvenly
 //        ) {
-//            Button(onClick = DashsClick) {
-//                Text("Dashboard")
-//            }
-//            Button(onClick = ThreatsClick) {
-//                Text("Threats")
-//            }
-//            Button(onClick = SettingsClick) {
-//                Text("Settings")
-//            }
+//            Button(onClick = DashsClick,
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )) {
+//                Text("Dashboard")}
+//            Button(onClick =  ThreatsClick,
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )) {
+//                Text("Threats")}
+//            Button(onClick = SettingsClick,
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color(0xFF2F3E63),
+//                    contentColor = Color.White
+//                )) {
+//                Text("Settings")}
 //        }
 //    }
 //
