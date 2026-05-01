@@ -4,14 +4,10 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
-import android.net.IpPrefix;
 import android.net.Network;
-import android.net.NetworkRequest;
 import android.net.VpnService;
-import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -22,9 +18,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.net.InetAddress;
 
 
 public class SafetyFirstVpnService extends VpnService{
@@ -270,7 +264,7 @@ public class SafetyFirstVpnService extends VpnService{
                         sb.append("]");
                         Log.d("TCP_TEST", "tunnel-to-file Wrote: " + sb);
                         */
-                        fileOutput.write(buffer, 0, packetlength);
+                        fileOutput.write(buffer, 0, readlength);
                         fileOutput.flush();
                         //Log.d("TCP_TEST", "tunnel-to-file Complete!");
                     }
