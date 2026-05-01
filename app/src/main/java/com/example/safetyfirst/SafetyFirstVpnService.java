@@ -116,7 +116,7 @@ public class SafetyFirstVpnService extends VpnService{
                     protect(socket);
                     connectivityManager.getActiveNetwork().bindSocket(socket);
                     setUnderlyingNetworks(new Network[] {connectivityManager.getActiveNetwork()});
-                    socket.connect(new java.net.InetSocketAddress("4.154.154.5", 9999));
+                    socket.connect(new java.net.InetSocketAddress("20.3.103.96", 9999));
                     runsocket(vpnInterface.getFileDescriptor(), socket);
                 } catch (java.io.IOException e) {
                     throw new RuntimeException(e);
@@ -171,8 +171,8 @@ public class SafetyFirstVpnService extends VpnService{
             tunnelOutput.write(hellobytes);
 
             //string of a standard ICMP packet pinging 8.8.8.8 for testing the tunnel
-            String icmpPacketString = "00 1E 45 00 00 1C 00 01 00 00 40 01 BE BB AC 11 00 04 08 08 08 08 08 00 F7 FF 00 00 00 00".replace(" ", "");
-            Log.i("ICMP_TEST", "a1: " + icmpPacketString);
+            String icmpPacketString = "00 1E 45 00 00 1C 00 01 00 00 40 01 BE BB C0 C6 02 00 08 08 08 08 08 00 F7 FF 00 00 00 00".replace(" ", "");
+            //Log.i("ICMP_TEST", "a1: " + icmpPacketString);
             byte[] icmpPacketBytes = new byte[icmpPacketString.length()/2];
             int index = 0;
 
@@ -186,34 +186,36 @@ public class SafetyFirstVpnService extends VpnService{
             }
 
             for (int i = 0; i<1; i++) {
-                Log.i("ICMP_TEST", "e1: " + i);
+                //Log.i("ICMP_TEST", "e1: " + i);
 
-                Log.i("ICMP_TEST", "result A: " + Arrays.toString(icmpPacketBytes));
+                Log.i("ICMP_TEST", "Sending echo request: " + Arrays.toString(icmpPacketBytes));
                 tunnelOutput.write(icmpPacketBytes);
                 tunnelOutput.flush();
 
-                Log.i("ICMP_TEST", "e2: " + i);
+                //Log.i("ICMP_TEST", "e2: " + i);
                 byte[] prebuffer = new byte[128];
                 tunnelInput.read(prebuffer, 0, 128);
-                Log.i("ICMP_TEST", "result B" + Arrays.toString(prebuffer));
+                Log.i("ICMP_TEST", "Received echo reply: " + Arrays.toString(prebuffer));
                 Thread.sleep(1000);
-                Log.i("ICMP_TEST", "e3: " + i);
+                //Log.i("ICMP_TEST", "e3: " + i);
 
             }
+            byte[] buffer = new byte[2048];
+            byte[] newbuffer = new byte[2048+2];
+            byte[] lengthbuffer = new byte[2];
             while (isOn){
                 boolean didanything = false;
-                byte[] buffer = new byte[2048];
+                Arrays.fill(buffer, (byte) 0);
                 int length;
 
                 //read packets from file
                 length = fileInput.read(buffer, 0, 2048);
                 if (length > 0) {
                     didanything = true;
-                    Log.d("TCP_TEST", "file-to-tunnel Length: " + length);
+                    //Log.d("TCP_TEST", "file-to-tunnel Length: " + length);
                     //turn the length of the packet into a 2 byte prefix
                     byte lengthHigh = (byte) (length / 256);
                     byte lengthLow = (byte) (length % 256);
-                    byte[] newbuffer = new byte[2048+2];
                     newbuffer[0] = lengthHigh;
                     newbuffer[1] = lengthLow;
 
@@ -224,6 +226,7 @@ public class SafetyFirstVpnService extends VpnService{
                     tunnelOutput.write(newbuffer, 0, length + 2);
                     tunnelOutput.flush();
 
+                    /*
                     StringBuilder sb = new StringBuilder();
                     sb.append("[");
                     for (int i = 0; i<length-1; i++){
@@ -233,10 +236,11 @@ public class SafetyFirstVpnService extends VpnService{
                     sb.append(String.format("%02x", newbuffer[length-1]));
                     sb.append("]");
                     Log.d("TCP_TEST", "file-to-tunnel Wrote: " + sb);
+
+                     */
                 }
                 //clear buffers
-                buffer = new byte[2048];
-                byte[] lengthbuffer = new byte[2];
+
 
                 //check for packets from tunnel
                 if (tunnelInput.available() >= 2) {
@@ -248,12 +252,13 @@ public class SafetyFirstVpnService extends VpnService{
                     Log.d("TCP_TEST", "read tunnel");
                     if (length > 0) {
                         int packetlength = ((lengthbuffer[0] & 0xFF) << 8) | (lengthbuffer[1] & 0xFF);
-                        Log.d("TCP_TEST", "tunnel-to-file Prefix Length: " + length + ", payload length: " + packetlength);
+                        //Log.d("TCP_TEST", "tunnel-to-file Prefix Length: " + length + ", payload length: " + packetlength);
 
                         //read the body of the payload of length taken from prefix
                         int readlength = tunnelInput.read(buffer, 0, packetlength);
 
                         //probably should move to helper function for logging
+                        /*
                         StringBuilder sb = new StringBuilder();
                         sb.append("[");
                         for (int i = 0; i<packetlength-1; i++){
@@ -262,11 +267,11 @@ public class SafetyFirstVpnService extends VpnService{
                         }
                         sb.append(String.format("%02x", buffer[packetlength-1]));
                         sb.append("]");
-
                         Log.d("TCP_TEST", "tunnel-to-file Wrote: " + sb);
+                        */
                         fileOutput.write(buffer, 0, packetlength);
                         fileOutput.flush();
-                        Log.d("TCP_TEST", "tunnel-to-file Complete!");
+                        //Log.d("TCP_TEST", "tunnel-to-file Complete!");
                     }
                 }
                 if (!didanything){
