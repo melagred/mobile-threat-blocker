@@ -1,85 +1,175 @@
-package com.example.safetyfirst;
+package com.example.safetyfirst
 
-import android.content.Intent;
-import android.net.VpnService;
-import android.os.Bundle;
-import android.widget.TextView;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
+import android.Manifest
+import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.compose.runtime.Composable
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import com.example.safetyfirst.ui.*
 
-public class MainActivity extends AppCompatActivity {
+class MainActivity : ComponentActivity() {
+    private val vm: LoginsViewModel by viewModels()
+    override fun onCreate(savedInstanceState: Bundle?) {
 
-    private ActivityResultLauncher<Intent> vpnPermissionLauncher;
+        super.onCreate(savedInstanceState)
 
-    private SwitchCompat switchVpn;
-    private TextView tvStatus;
+//        ApiClient.checkDomain("example.com") { result ->
+//            Log.d("API_Test", "Response: $result")
+//            runOnUiThread {
+//                Toast.makeText(this, "Domain checked: $result", Toast.LENGTH_SHORT).show()
+//            }
+//        }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        if (Build.VERSION.SDK_INT >= 33) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.POST_NOTIFICATIONS}, 200);
-            }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                200
+            )
         }
+        enableEdgeToEdge()
 
-        tvStatus = findViewById(R.id.tvStatus);
-        switchVpn = findViewById(R.id.switchVpn);
+        setContent {
+            AppNavigation(vm)
 
-        vpnPermissionLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == RESULT_OK) {
-                        startVpn();
-                    } else {
-                        switchVpn.setChecked(false);
-                        tvStatus.setText(getString(R.string.protection_off));
-                    }
-                }
-        );
 
-        switchVpn.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) requestVpnPermission();
-            else stopVpn();
-        });
-    }
-
-    private void requestVpnPermission() {
-        Intent prepareIntent = VpnService.prepare(this);
-        if (prepareIntent != null) {
-            vpnPermissionLauncher.launch(prepareIntent);
-        } else {
-            startVpn();
         }
     }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 100 && resultCode == Activity.RESULT_OK) {
+            //start
+            val startIntent = Intent(this, SafetyFirstVpnService::class.java)
+            startIntent.action = SafetyFirstVpnService.ACTION_START
+            ContextCompat.startForegroundService(this, startIntent)
 
-    private void startVpn() {
-        Intent i = new Intent(this, SafetyFirstVpnService.class);
-        i.setAction(SafetyFirstVpnService.ACTION_START);
-
-        startForegroundService(i);
-
-        tvStatus.setText(getString(R.string.protection_on));
+            // update
+            val vm: LoginsViewModel = ViewModelProvider(this)[LoginsViewModel::class.java]
+            vm.setVpnOn(true)
+        }
     }
-
-    private void stopVpn() {
-        Intent i = new Intent(this, SafetyFirstVpnService.class);
-        i.setAction(SafetyFirstVpnService.ACTION_STOP);
-        startService(i);
-        tvStatus.setText(getString(R.string.protection_off));
-    }
-
-
 }
+
+@Composable
+fun AppNavigation(viewModel: LoginsViewModel) {
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController,
+        startDestination = Routes.DashboardScreen){
+        composable(Routes.DashboardScreen){
+            DashboardScreen(
+                viewModel = viewModel,
+                ThreatsClick = {
+                    navController.navigate(Routes.ThreatsScreen)
+                },
+                SettingsClick = {
+                    navController.navigate(Routes.SettingScreen)
+                }
+            )
+        }
+        composable(Routes.ThreatsScreen){
+            ThreatsScreen(
+                DashsClick = {
+                    navController.navigate(Routes.DashboardScreen)
+                },
+                ThreatsClick = {
+                    navController.navigate(Routes.ThreatsScreen)
+                },
+                SettingsClick = {
+                    navController.navigate(Routes.SettingScreen)
+                },
+                ThreatsLogClick = {
+                    navController.navigate(Routes.ThreatLogScreen)
+                }
+            )
+        }
+
+        composable(Routes.SettingScreen){
+            SettingsScreen(
+                DashsClick = {
+                navController.navigate(Routes.DashboardScreen)
+            },
+                ThreatsClick = {
+                    navController.navigate(Routes.ThreatsScreen)
+                },
+                AboutClick = {
+                    navController.navigate(Routes.AboutScreen)
+                })
+        }
+
+        composable(Routes.ThreatLogScreen){
+            ThreatLogScreen(
+                DashsClick = {
+                    navController.navigate(Routes.DashboardScreen)
+                },
+                ThreatsClick = {
+                    navController.navigate(Routes.ThreatsScreen)
+                },
+                SettingsClick = {
+                    navController.navigate(Routes.SettingScreen)
+                }
+            )
+        }
+
+        composable(Routes.AboutScreen){
+            AboutScreen(
+                DashsClick = {
+                    navController.navigate(Routes.DashboardScreen)
+                },
+                ThreatsClick = {
+                    navController.navigate(Routes.ThreatsScreen)
+                },
+                SettingsClick = {
+                    navController.navigate(Routes.SettingScreen)
+                }
+                )
+        }
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

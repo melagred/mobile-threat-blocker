@@ -1,4 +1,4 @@
-package com.example.cse4550_login
+package com.example.safetyfirst.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

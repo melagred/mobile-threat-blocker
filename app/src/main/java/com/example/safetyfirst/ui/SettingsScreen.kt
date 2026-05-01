@@ -1,8 +1,7 @@
-package com.example.cse4550_login
+package com.example.safetyfirst.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun SettingScreen(
+fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
     DashsClick: () -> Unit,
     ThreatsClick: () -> Unit,
@@ -157,7 +156,7 @@ fun SettingToggleButton(
  }
 
 
-import androidx.compose.foundation.background
+//import androidx.compose.foundation.background
 //import androidx.compose.foundation.border
 //import androidx.compose.foundation.clickable
 //import androidx.compose.foundation.layout.Arrangement

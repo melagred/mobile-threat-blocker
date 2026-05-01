@@ -1,8 +1,7 @@
-package com.example.cse4550_login
+package com.example.safetyfirst.ui
+
+import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 
 class SettingsViewModel : ViewModel() {
     // Toggle states for your 4 blocks
@@ -17,4 +16,3 @@ class SettingsViewModel : ViewModel() {
     fun toggleConnectionsUpdates() { connectionsUpdates = !connectionsUpdates }
     fun toggleWeeklyReports() { weeklyReports = !weeklyReports }
 }
-

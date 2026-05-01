@@ -1,4 +1,4 @@
-package com.example.cse4550_login
+package com.example.safetyfirst.ui
 
 
 import androidx.compose.foundation.Image
@@ -21,6 +21,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.VisualTransformation
+import com.example.safetyfirst.R
 
 
 
@@ -40,7 +41,7 @@ fun LoginScreen(authVM: LoginsViewModel, loginSuccess: () -> Unit, goToRegister:
     Column(modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally) {
-        Image(painter = painterResource(id = R.drawable.s), contentDescription = "Login image")
+        Image(painter = painterResource(id = R.drawable.safetyicon), contentDescription = "Login image")
 
         Text(text = "Welcome to")
         Text(text = "Safety First")

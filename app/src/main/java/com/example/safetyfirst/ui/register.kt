@@ -1,4 +1,4 @@
-package com.example.cse4550_login
+package com.example.safetyfirst.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -22,13 +22,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.safetyfirst.ui.LoginsViewModel
+import com.example.safetyfirst.R
 
 @Composable
 fun RegisterScreen(authVm: LoginsViewModel, RegisterSuccess: ()-> Unit, GoToLogin: ()-> Unit){
     Column(modifier = Modifier.fillMaxSize().padding(bottom = 100.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally) {
-        Image(painter = painterResource(id = R.drawable.s), contentDescription = "Login image")
+        Image(painter = painterResource(id = R.drawable.safetyicon), contentDescription = "Login image")
         Spacer(modifier = Modifier.height(10.dp))
 
         OutlinedTextField(authVm.email, onValueChange = {
