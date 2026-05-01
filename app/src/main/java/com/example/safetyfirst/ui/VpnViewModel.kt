@@ -20,4 +20,13 @@ class VpnViewModel : ViewModel() {
     fun addNotification(msg: String) {
         _notifications.value = _notifications.value + msg
     }
+
+    private val _events = MutableStateFlow<List<GatewayEvent>>(emptyList())
+    val events: StateFlow<List<GatewayEvent>> = _events.asStateFlow()
+
+    fun refreshEvents() {
+        ApiClient.fetchEvents { result ->
+            if (result != null) _events.value = result
+        }
+    }
 }

@@ -1,64 +1,77 @@
 package com.example.safetyfirst.ui
 
-import okhttp3.*
 import android.util.Log
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import org.json.JSONArray
+import java.io.IOException
+import java.util.concurrent.TimeUnit
+
+data class GatewayEvent(
+    val ts: Long,
+    val type: String,
+    val domain: String,
+    val verdict: String,
+)
 
 object ApiClient {
 
-    private val client = OkHttpClient()
+    private const val GATEWAY_HOST = "20.3.103.96"
+    private const val EVENTS_PORT = 9999
 
-    fun checkDomain(domain: String, callback: (String?) -> Unit) {
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(3, TimeUnit.SECONDS)
+        .readTimeout(5, TimeUnit.SECONDS)
+        .build()
 
-//        val json = JSONObject()
-//        json.put("domain", domain)
-//        val body = json.toString()
-//            .toRequestBody("application/json".toMediaType())
-//        val request = Request.Builder()
-//            .url("http://4.154.154.5:8080/check-domain")
-//            .post(body)
-//            .build()
-//
-//
-//        client.newCall(request).enqueue(object : Callback {
-//
-//            override fun onFailure(call: Call, e: IOException) {
-//                Log.e("API_TEST", "Error: ${e.message}")
-//                callback(null)
-//            }
-//
-//            override fun onResponse(call: Call, response: Response) {
-//                callback(response.body?.string())
-//            }
-//        })
-        // Log that API was called
-        Log.d("API_TEST", "checkDomain called with: $domain (mocked response)")
+    fun fetchEvents(callback: (List<GatewayEvent>?) -> Unit) {
+        val request = Request.Builder()
+            .url("http://$GATEWAY_HOST:$EVENTS_PORT/events")
+            .get()
+            .build()
 
-        // Simulate a network call delay
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            val fakeResponse = """{"domain":"$domain","status":"safe"}"""
-            callback(fakeResponse)
-        }, 500) // half-second delay
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.w("API_TEST", "fetchEvents failed: ${e.message}")
+                callback(null)
+            }
 
-
-
-
-
+            override fun onResponse(call: Call, response: Response) {
+                response.use {
+                    if (!it.isSuccessful) {
+                        Log.w("API_TEST", "fetchEvents HTTP ${it.code}")
+                        callback(null)
+                        return
+                    }
+                    val body = it.body?.string().orEmpty()
+                    callback(parseEvents(body))
+                }
+            }
+        })
     }
 
+    private fun parseEvents(body: String): List<GatewayEvent> {
+        return try {
+            val arr = JSONArray(body)
+            val out = ArrayList<GatewayEvent>(arr.length())
+            for (i in 0 until arr.length()) {
+                val o = arr.getJSONObject(i)
+                out.add(
+                    GatewayEvent(
+                        ts = o.optLong("ts"),
+                        type = o.optString("type"),
+                        domain = o.optString("domain"),
+                        verdict = o.optString("verdict"),
+                    )
+                )
+            }
+            out
+        } catch (e: Exception) {
+            Log.w("API_TEST", "parseEvents failed: ${e.message}")
+            emptyList()
+        }
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

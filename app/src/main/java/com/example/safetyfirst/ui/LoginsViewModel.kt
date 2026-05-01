@@ -29,6 +29,15 @@ class LoginsViewModel : ViewModel() {
         _vpnOn.value = on
     }
 
+    private val _events = MutableStateFlow<List<GatewayEvent>>(emptyList())
+    val events: StateFlow<List<GatewayEvent>> = _events.asStateFlow()
+
+    fun refreshEvents() {
+        ApiClient.fetchEvents { result ->
+            if (result != null) _events.value = result
+        }
+    }
+
     fun register() {
         //api
 
