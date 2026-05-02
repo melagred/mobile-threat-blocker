@@ -11,12 +11,20 @@ public class ThreatDetector {
         BLOCK
     }
 
+    public enum Category {
+        SAFE,
+        PHISHING,
+        MALWARE,
+        SUSPICIOUS_TLD,
+        MALFORMED,
+        SUSPICIOUS_PATTERN
+    }
+
     private final Set<String> blacklist;
     private final Set<String> suspiciousTlds;
     private final Set<String> phishingKeywords;
 
     public ThreatDetector() {
-
         blacklist = new HashSet<>();
         blacklist.add("knownbad.com");
         blacklist.add("phishing-test.xyz");
@@ -40,69 +48,104 @@ public class ThreatDetector {
     }
 
     public Decision analyzeDomain(String domain) {
+        Category category = getCategory(domain);
 
-        if (domain == null || domain.isEmpty()) {
+        if (category == Category.MALFORMED || category == Category.MALWARE) {
             return Decision.BLOCK;
+        }
+
+        if (category == Category.PHISHING || category == Category.SUSPICIOUS_PATTERN) {
+            return Decision.BLOCK;
+        }
+
+        if (category == Category.SUSPICIOUS_TLD) {
+            return Decision.WARN;
+        }
+
+        return Decision.ALLOW;
+    }
+
+    public Category getCategory(String domain) {
+        if (domain == null || domain.isEmpty()) {
+            return Category.MALFORMED;
         }
 
         domain = domain.toLowerCase().trim();
 
         if (blacklist.contains(domain)) {
-            return Decision.BLOCK;
+            if (domain.contains("malware")) {
+                return Category.MALWARE;
+            }
+            if (domain.contains("phishing")) {
+                return Category.PHISHING;
+            }
+            return Category.SUSPICIOUS_PATTERN;
         }
 
         String[] parts = domain.split("\\.");
 
         if (parts.length < 2) {
-            return Decision.BLOCK;
+            return Category.MALFORMED;
         }
-
-        int suspiciousCount = 0;
 
         for (String part : parts) {
             if (part.isEmpty()) {
-                return Decision.BLOCK;
+                return Category.MALFORMED;
             }
 
             if (part.startsWith("-") || part.endsWith("-")) {
-                return Decision.BLOCK;
+                return Category.MALFORMED;
             }
 
             if (part.length() > 63) {
-                return Decision.BLOCK;
+                return Category.MALFORMED;
             }
+        }
 
-            if (looksRandom(part)) {
-                suspiciousCount++;
-            }
+        if (containsPhishingKeyword(domain)) {
+            return Category.PHISHING;
         }
 
         String tld = parts[parts.length - 1];
         if (suspiciousTlds.contains(tld)) {
-            suspiciousCount++;
+            return Category.SUSPICIOUS_TLD;
         }
 
         if (domain.contains("xn--")) {
-            suspiciousCount++;
-        }
-
-        if (containsPhishingKeyword(domain)) {
-            suspiciousCount++;
+            return Category.SUSPICIOUS_PATTERN;
         }
 
         if (countHyphens(domain) >= 2) {
-            suspiciousCount++;
+            return Category.SUSPICIOUS_PATTERN;
         }
 
-        if (suspiciousCount >= 2) {
-            return Decision.BLOCK;
+        for (String part : parts) {
+            if (looksRandom(part)) {
+                return Category.SUSPICIOUS_PATTERN;
+            }
         }
 
-        if (suspiciousCount == 1) {
-            return Decision.WARN;
-        }
+        return Category.SAFE;
+    }
 
-        return Decision.ALLOW;
+    public String getCategoryLabel(String domain) {
+        Category category = getCategory(domain);
+
+        switch (category) {
+            case PHISHING:
+                return "Phishing";
+            case MALWARE:
+                return "Malware";
+            case SUSPICIOUS_TLD:
+                return "Suspicious TLD";
+            case MALFORMED:
+                return "Malformed Domain";
+            case SUSPICIOUS_PATTERN:
+                return "Suspicious Pattern";
+            case SAFE:
+            default:
+                return "Safe";
+        }
     }
 
     private boolean containsPhishingKeyword(String domain) {
@@ -116,11 +159,13 @@ public class ThreatDetector {
 
     private int countHyphens(String domain) {
         int count = 0;
+
         for (int i = 0; i < domain.length(); i++) {
             if (domain.charAt(i) == '-') {
                 count++;
             }
         }
+
         return count;
     }
 
@@ -130,6 +175,7 @@ public class ThreatDetector {
         }
 
         int digitCount = 0;
+
         for (int i = 0; i < label.length(); i++) {
             if (Character.isDigit(label.charAt(i))) {
                 digitCount++;
