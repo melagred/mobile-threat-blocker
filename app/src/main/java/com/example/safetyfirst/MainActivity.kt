@@ -21,11 +21,16 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
 import com.example.safetyfirst.ui.*
 
-
 class MainActivity : ComponentActivity() {
+
+    companion object {
+        private const val VPN_REQUEST_CODE = 100
+        private const val PREFS_NAME = "vpn_state"
+        private const val KEY_VPN_ON = "vpn_on"
+    }
+
     private val vpnViewModel: VpnViewModel by viewModels()
     private lateinit var vpnReceiver: BroadcastReceiver
 
@@ -39,6 +44,7 @@ class MainActivity : ComponentActivity() {
                 vpnViewModel.addNotification(msg)
             }
         }
+
         registerReceiver(
             vpnReceiver,
             IntentFilter("VPN_NOTIF"),
@@ -56,25 +62,47 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+
         enableEdgeToEdge()
 
-        if (AppPrefs.getAutoStart(this)) {
+        // Restore saved VPN UI state when app opens from notification
+        vpnViewModel.setVpnOn(getSavedVpnState())
+
+        if (AppPrefs.getAutoStart(this) && !getSavedVpnState()) {
             val prepareIntent = VpnService.prepare(this)
             if (prepareIntent != null) {
                 Log.d("VPN_DEBUG", "Auto-start: requesting VPN permission")
-                startActivityForResult(prepareIntent, 100)
+                startActivityForResult(prepareIntent, VPN_REQUEST_CODE)
             } else {
                 Log.d("VPN_DEBUG", "Auto-start: permission already granted, starting VPN")
-                val startIntent = Intent(this, SafetyFirstVpnService::class.java)
-                startIntent.action = SafetyFirstVpnService.ACTION_START
-                ContextCompat.startForegroundService(this, startIntent)
-                vpnViewModel.setVpnOn(true)
+                startVpnService()
             }
         }
 
         setContent {
             AppNavigation(vpnViewModel = vpnViewModel)
         }
+    }
+
+    private fun startVpnService() {
+        val startIntent = Intent(this, SafetyFirstVpnService::class.java)
+        startIntent.action = SafetyFirstVpnService.ACTION_START
+        ContextCompat.startForegroundService(this, startIntent)
+
+        saveVpnState(true)
+        vpnViewModel.setVpnOn(true)
+    }
+
+    private fun saveVpnState(isOn: Boolean) {
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_VPN_ON, isOn)
+            .apply()
+    }
+
+    private fun getSavedVpnState(): Boolean {
+        return getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            .getBoolean(KEY_VPN_ON, false)
     }
 
     override fun onDestroy() {
@@ -84,22 +112,26 @@ class MainActivity : ComponentActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 100 && resultCode == Activity.RESULT_OK) {
-            val startIntent = Intent(this, SafetyFirstVpnService::class.java)
-            startIntent.action = SafetyFirstVpnService.ACTION_START
-            ContextCompat.startForegroundService(this, startIntent)
-            vpnViewModel.setVpnOn(true)
+
+        if (requestCode == VPN_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                startVpnService()
+            } else {
+                saveVpnState(false)
+                vpnViewModel.setVpnOn(false)
+            }
         }
     }
 }
 
-
 @Composable
 fun AppNavigation(vpnViewModel: VpnViewModel) {
     val navController = rememberNavController()
+
     NavHost(
         navController = navController,
-        startDestination = Routes.DashboardScreen) {
+        startDestination = Routes.DashboardScreen
+    ) {
         composable(Routes.DashboardScreen) {
             DashboardScreen(
                 vpnViewModel = vpnViewModel,
@@ -107,6 +139,7 @@ fun AppNavigation(vpnViewModel: VpnViewModel) {
                 SettingsClick = { navController.navigate(Routes.SettingScreen) }
             )
         }
+
         composable(Routes.ThreatsScreen) {
             ThreatsScreen(
                 DashsClick = { navController.navigate(Routes.DashboardScreen) },
@@ -115,6 +148,7 @@ fun AppNavigation(vpnViewModel: VpnViewModel) {
                 ThreatsLogClick = { navController.navigate(Routes.ThreatLogScreen) }
             )
         }
+
         composable(Routes.SettingScreen) {
             SettingScreen(
                 DashsClick = { navController.navigate(Routes.DashboardScreen) },
@@ -122,6 +156,7 @@ fun AppNavigation(vpnViewModel: VpnViewModel) {
                 AboutClick = { navController.navigate(Routes.AboutScreen) }
             )
         }
+
         composable(Routes.ThreatLogScreen) {
             ThreatLogScreen(
                 DashsClick = { navController.navigate(Routes.DashboardScreen) },
@@ -129,6 +164,7 @@ fun AppNavigation(vpnViewModel: VpnViewModel) {
                 SettingsClick = { navController.navigate(Routes.SettingScreen) }
             )
         }
+
         composable(Routes.AboutScreen) {
             AboutScreen(
                 DashsClick = { navController.navigate(Routes.DashboardScreen) },
