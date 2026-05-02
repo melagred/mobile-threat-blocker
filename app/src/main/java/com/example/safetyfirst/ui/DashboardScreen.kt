@@ -83,94 +83,80 @@ fun DashboardScreen(
             )
         }
 
-        Column(
+        Spacer(modifier = Modifier.height(40.dp))
+
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
-                .padding(top = 60.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .padding(horizontal = 16.dp)
+                .height(220.dp)
+                .background(Color(0xFF2F3E63), shape = RoundedCornerShape(24.dp))
+                .padding(24.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .height(300.dp)
-                    .background(Color(0xFF2F3E63), shape = RoundedCornerShape(24.dp))
-                    .padding(24.dp),
-                contentAlignment = Alignment.Center
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = if (vpnOn) "PROTECTED" else "NOT PROTECTED",
-                        fontSize = 26.sp,
-                        color = if (vpnOn) Color.Green else Color.Red
-                    )
+                Text(
+                    text = if (vpnOn) "PROTECTED" else "NOT PROTECTED",
+                    fontSize = 26.sp,
+                    color = if (vpnOn) Color.Green else Color.Red
+                )
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                    Button(
-                        onClick = {
-                            if (!vpnOn) {
-                                val intent = VpnService.prepare(context)
-                                if (intent != null) {
-                                    Log.d("VPN_DEBUG", "Requesting VPN permission")
-                                    activity?.startActivityForResult(intent, 100)
-                                } else {
-                                    Log.d("VPN_DEBUG", "Already approved, starting VPN")
-                                    startVpn(context)
-                                    vpnViewModel.setVpnOn(true)
-                                }
+                Button(
+                    onClick = {
+                        if (!vpnOn) {
+                            val intent = VpnService.prepare(context)
+                            if (intent != null) {
+                                Log.d("VPN_DEBUG", "Requesting VPN permission")
+                                activity?.startActivityForResult(intent, 100)
                             } else {
-                                stopVpn(context)
-                                vpnViewModel.setVpnOn(false)
+                                Log.d("VPN_DEBUG", "Already approved, starting VPN")
+                                startVpn(context)
+                                vpnViewModel.setVpnOn(true)
                             }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF6C8ED9),
-                            contentColor = Color.White),
-                        shape = RoundedCornerShape(40.dp),
-                        modifier = Modifier
-                            .height(80.dp)
-                            .fillMaxWidth(0.7f)
-                    ) {
-                        Icon(
-                            imageVector = if (vpnOn) Icons.Default.PowerSettingsNew else Icons.Default.Lock,
-                            contentDescription = "VPN Icon"
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = if (vpnOn) "DISCONNECT" else "CONNECT",
-                            fontSize = 18.sp
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.weight(1f))
-
+                        } else {
+                            stopVpn(context)
+                            vpnViewModel.setVpnOn(false)
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF6C8ED9),
+                        contentColor = Color.White),
+                    shape = RoundedCornerShape(40.dp),
+                    modifier = Modifier
+                        .height(70.dp)
+                        .fillMaxWidth(0.7f)
+                ) {
+                    Icon(
+                        imageVector = if (vpnOn) Icons.Default.PowerSettingsNew else Icons.Default.Lock,
+                        contentDescription = "VPN Icon"
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (vpnOn) "Status: Secure connection active" else "Status: VPN is off",
-                        fontSize = 18.sp,
-                        color = Color.White
+                        text = if (vpnOn) "DISCONNECT" else "CONNECT",
+                        fontSize = 18.sp
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .weight(1f)
                 .padding(horizontal = 16.dp)
                 .background(Color(0xFFEAEAEA), shape = RoundedCornerShape(20.dp))
-                .padding(vertical = 30.dp, horizontal = 16.dp)
+                .padding(vertical = 16.dp, horizontal = 8.dp)
         ) {
             if (events.isEmpty()) {
                 Box(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -179,13 +165,16 @@ fun DashboardScreen(
                     )
                 }
             } else {
-                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    reverseLayout = true,
+                ) {
                     items(events) { event -> EventRow(event) }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             modifier = Modifier

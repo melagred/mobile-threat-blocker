@@ -65,6 +65,7 @@ dependencies {
     implementation("androidx.navigation:navigation-ui:2.9.7")
     implementation("androidx.navigation:navigation-compose:2.9.7")
 
+    implementation("androidx.compose.material:material-icons-extended")
     implementation("com.squareup.okhttp3:okhttp:5.3.0")
     // Android Studio Preview support
     implementation("androidx.compose.ui:ui-tooling-preview")

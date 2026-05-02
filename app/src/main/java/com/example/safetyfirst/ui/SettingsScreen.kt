@@ -18,8 +18,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,7 +33,6 @@ fun SettingScreen(
     ThreatsClick: () -> Unit,
     AboutClick: () -> Unit
 ) {
-    val vpnAutoStart by viewModel.vpnAutoStartFlow.collectAsState(initial = false)
     Column(
         modifier = Modifier
             .background(Color.LightGray)
@@ -93,8 +90,8 @@ fun SettingScreen(
         SettingToggleButton(
             title = "VPN Auto-Start",
             description = "Automatically connect on app launch",
-            isSelected = vpnAutoStart,
-            onToggle = { viewModel.SetAutoStartFlow(it) }
+            isSelected = viewModel.vpnAutoStart,
+            onToggle = { viewModel.toggleVpnAutoStart() }
         )
         SettingToggleButton(
             title = "Thread Alerts",
