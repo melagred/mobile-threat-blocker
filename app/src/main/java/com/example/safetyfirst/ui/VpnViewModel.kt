@@ -14,6 +14,7 @@ class VpnViewModel : ViewModel() {
         _vpnOn.value = on
     }
 
+
     private val _notifications = MutableStateFlow<List<String>>(emptyList())
     val notifications: StateFlow<List<String>> = _notifications
 

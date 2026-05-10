@@ -23,6 +23,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.safetyfirst.ui.*
 
+
+
 class MainActivity : ComponentActivity() {
 
     companion object {

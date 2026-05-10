@@ -64,7 +64,7 @@ fun AboutScreen(
                     contentColor = Color.White
                 )
             ) {
-                Text(text = "General")
+                Text(text = "Back")
             }
             Button(
                 onClick = {},
