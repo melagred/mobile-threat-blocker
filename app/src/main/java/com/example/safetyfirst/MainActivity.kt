@@ -18,13 +18,17 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.safetyfirst.ui.*
+import androidx.core.content.edit
+import com.example.safetyfirst.ui.common.Navbar
 
 class MainActivity : ComponentActivity() {
 
+    lateinit var navController: NavHostController
     companion object {
         private const val VPN_REQUEST_CODE = 100
         private const val PREFS_NAME = "vpn_state"
@@ -33,6 +37,7 @@ class MainActivity : ComponentActivity() {
 
     private val vpnViewModel: VpnViewModel by viewModels()
     private lateinit var vpnReceiver: BroadcastReceiver
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,9 +104,9 @@ class MainActivity : ComponentActivity() {
 
     private fun saveVpnState(isOn: Boolean) {
         getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-            .edit()
-            .putBoolean(KEY_VPN_ON, isOn)
-            .apply()
+            .edit {
+                putBoolean(KEY_VPN_ON, isOn)
+            }
     }
 
     private fun getSavedVpnState(): Boolean {
@@ -114,6 +119,7 @@ class MainActivity : ComponentActivity() {
         unregisterReceiver(vpnReceiver)
     }
 
+    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -126,55 +132,61 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
+    @Composable
+    fun AppNavigation(vpnViewModel: VpnViewModel) {
+        navController = rememberNavController()
 
-@Composable
-fun AppNavigation(vpnViewModel: VpnViewModel) {
-    val navController = rememberNavController()
-
-    NavHost(
-        navController = navController,
-        startDestination = Routes.DashboardScreen
-    ) {
-        composable(Routes.DashboardScreen) {
-            DashboardScreen(
-                vpnViewModel = vpnViewModel,
-                ThreatsClick = { navController.navigate(Routes.ThreatsScreen) },
-                SettingsClick = { navController.navigate(Routes.SettingScreen) }
+        val navbar: @Composable () -> Unit = {
+            Navbar(
+                dashboardNavigate = { navController.navigate(Routes.DashboardScreen) },
+                threatsNavigate = { navController.navigate(Routes.ThreatsScreen) },
+                settingsNavigate = { navController.navigate(Routes.SettingScreen) }
             )
+
         }
 
-        composable(Routes.ThreatsScreen) {
-            ThreatsScreen(
-                DashsClick = { navController.navigate(Routes.DashboardScreen) },
-                ThreatsClick = { navController.navigate(Routes.ThreatsScreen) },
-                SettingsClick = { navController.navigate(Routes.SettingScreen) },
-                ThreatsLogClick = { navController.navigate(Routes.ThreatLogScreen) }
-            )
-        }
+        NavHost(
+            navController = navController,
+            startDestination = Routes.DashboardScreen
+        ) {
 
-        composable(Routes.SettingScreen) {
-            SettingScreen(
-                DashsClick = { navController.navigate(Routes.DashboardScreen) },
-                ThreatsClick = { navController.navigate(Routes.ThreatsScreen) },
-                AboutClick = { navController.navigate(Routes.AboutScreen) }
-            )
-        }
 
-        composable(Routes.ThreatLogScreen) {
-            ThreatLogScreen(
-                DashsClick = { navController.navigate(Routes.DashboardScreen) },
-                ThreatsClick = { navController.navigate(Routes.ThreatsScreen) },
-                SettingsClick = { navController.navigate(Routes.SettingScreen) }
-            )
-        }
+            composable(Routes.DashboardScreen) {
+                DashboardScreen(
+                    vpnViewModel = vpnViewModel,
+                    navbar = navbar
+                )
+            }
 
-        composable(Routes.AboutScreen) {
-            AboutScreen(
-                DashsClick = { navController.navigate(Routes.DashboardScreen) },
-                ThreatsClick = { navController.navigate(Routes.ThreatsScreen) },
-                SettingsClick = { navController.navigate(Routes.SettingScreen) }
-            )
+            composable(Routes.ThreatsScreen) {
+                ThreatsScreen(
+                    threatsLogNavigate = { navController.navigate(Routes.ThreatLogScreen) },
+                    navbar = navbar
+                )
+            }
+
+            composable(Routes.SettingScreen) {
+                SettingScreen(
+                    navbar = navbar,
+                    aboutNavigate = { navController.navigate(Routes.AboutScreen) }
+                )
+            }
+
+            composable(Routes.ThreatLogScreen) {
+                ThreatLogScreen(
+                    navbar = navbar
+                )
+            }
+
+            composable(Routes.AboutScreen) {
+                AboutScreen(
+                    DashsClick = { navController.navigate(Routes.DashboardScreen) },
+                    ThreatsClick = { navController.navigate(Routes.ThreatsScreen) },
+                    SettingsClick = { navController.navigate(Routes.SettingScreen) }
+                )
+            }
         }
     }
+
 }
+

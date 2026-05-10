@@ -42,8 +42,8 @@ import java.util.Locale
 @Composable
 fun DashboardScreen(
     vpnViewModel: VpnViewModel,
-    ThreatsClick: () -> Unit,
-    SettingsClick: () -> Unit) {
+    navbar: @Composable () -> Unit
+) {
 
     val context = LocalContext.current
     val activity = context.findActivity()
@@ -60,7 +60,7 @@ fun DashboardScreen(
     Column(modifier = Modifier
         .background(Color(0xFFC0C0C0))
         .fillMaxSize()
-        ) {
+    ) {
         Spacer(modifier = Modifier.padding(10.dp))
 
         Row(
@@ -125,7 +125,8 @@ fun DashboardScreen(
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF6C8ED9),
-                        contentColor = Color.White),
+                        contentColor = Color.White
+                    ),
                     shape = RoundedCornerShape(40.dp),
                     modifier = Modifier
                         .height(70.dp)
@@ -176,32 +177,7 @@ fun DashboardScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFF2F3E63))
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Button(onClick = {},
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2F3E63),
-                    contentColor = Color.White
-                )) {
-                Text("Dashboard")}
-            Button(onClick = ThreatsClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2F3E63),
-                    contentColor = Color.White
-                )) {
-                Text("Threats")}
-            Button(onClick = SettingsClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2F3E63),
-                    contentColor = Color.White
-                )) {
-                Text("Settings")}
-        }
+        navbar()
     }
 }
 

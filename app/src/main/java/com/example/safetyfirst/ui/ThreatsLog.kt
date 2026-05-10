@@ -18,9 +18,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 
 fun ThreatLogScreen(
-    DashsClick: () -> Unit,
-    ThreatsClick: () -> Unit,
-    SettingsClick: () -> Unit,
+    navbar: @Composable () -> Unit,
 
 ){
     Column(
@@ -31,23 +29,8 @@ fun ThreatLogScreen(
 
 
         Spacer(modifier = Modifier.weight(1f))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Gray)
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Button(onClick = DashsClick) {
-                Text("Dashboard")
-            }
-            Button(onClick = ThreatsClick) {
-                Text("Threats")
-            }
-            Button(onClick = SettingsClick) {
-                Text("Settings")
-            }
-        }
+
+        navbar()
     }
 }
 

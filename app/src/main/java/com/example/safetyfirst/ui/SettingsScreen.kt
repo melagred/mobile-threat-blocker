@@ -1,5 +1,6 @@
 package com.example.safetyfirst.ui
 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -27,13 +28,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.safetyfirst.ui.common.Navbar
 
 @Composable
 fun SettingScreen(
     viewModel: SettingsViewModel = viewModel(),
-    DashsClick: () -> Unit,
-    ThreatsClick: () -> Unit,
-    AboutClick: () -> Unit
+    navbar: @Composable () -> Unit,
+    aboutNavigate: () -> Unit
 ) {
     val context = LocalContext.current
     LaunchedEffect(Unit) {
@@ -44,10 +45,8 @@ fun SettingScreen(
     }
     Column(
         modifier = Modifier
-            .background(Color.LightGray)
             .background(Color(0xFFC0C0C0))
             .fillMaxSize()
-            .padding(horizontal = 16.dp, vertical = 0.dp)
     ) {
         Spacer(modifier = Modifier.height(40.dp))
         Text(
@@ -81,7 +80,7 @@ fun SettingScreen(
                 Text(text = "General")
             }
             Button(
-                onClick = AboutClick,
+                onClick = aboutNavigate,
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.width(150.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -119,33 +118,8 @@ fun SettingScreen(
         
         Spacer(modifier = Modifier.weight(1f)) // pushes the next block to the bottom
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.LightGray)
-                .background(Color(0xFF2F3E63))
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Button(onClick = DashsClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2F3E63),
-                    contentColor = Color.White
-                )) {
-                Text("Dashboard")}
-            Button(onClick =  ThreatsClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2F3E63),
-                    contentColor = Color.White
-                )) {
-                Text("Threats")}
-            Button(onClick = {},
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2F3E63),
-                    contentColor = Color.White
-                )) {
-                Text("Settings")}
-        }
+        navbar()
+
     }
 }
 

@@ -44,12 +44,19 @@ fun AboutScreen(
     ) {
         Spacer(modifier = Modifier.height(40.dp))
         Text(
-            text = "Terms of service",
+            text = "Terms of Service",
             fontSize = 25.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF2F3E63)
         )
-        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = "",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF2F3E63)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),

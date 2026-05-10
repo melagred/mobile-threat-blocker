@@ -23,11 +23,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun ThreatsScreen(
-    viewModel: SettingsViewModel = viewModel(),
-    DashsClick: () -> Unit,
-    ThreatsClick: () -> Unit,
-    SettingsClick: () -> Unit,
-    ThreatsLogClick: () -> Unit
+    threatsLogNavigate: () -> Unit,
+    navbar: @Composable () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -94,47 +91,16 @@ fun ThreatsScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(onClick = ThreatsLogClick) {
+                Button(onClick = threatsLogNavigate) {
                     Text(text = "View Log")
                 }
-                Button(onClick = {}) {
-                    Text(text = "Log summary")
-                }
             }
-
-
         }
-
-
-
-
-
-
-
-
-
 
         Spacer(modifier = Modifier.weight(1f))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Gray)
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Button(onClick = DashsClick) {
-                Text("Dashboard")
-            }
-            Button(onClick = ThreatsClick) {
-                Text("Threats")
-            }
-            Button(onClick = SettingsClick) {
-                Text("Settings")
-            }
-        }
+
+        navbar()
     }
-
-
 }
 //import androidx.compose.foundation.background
 //import androidx.compose.foundation.layout.Arrangement
