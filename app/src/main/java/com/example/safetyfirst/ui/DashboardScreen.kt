@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PowerSettingsNew
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -38,7 +40,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
 @Composable
 fun DashboardScreen(
     vpnViewModel: VpnViewModel,
@@ -49,10 +50,17 @@ fun DashboardScreen(
     val activity = context.findActivity()
     val vpnOn by vpnViewModel.vpnOn.collectAsState()
     val events by vpnViewModel.events.collectAsState()
+    val activeThreat by vpnViewModel.activeThreat.collectAsState()
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            vpnViewModel.refreshEvents()
+    LaunchedEffect(vpnOn) {
+
+        while (vpnOn) {
+
+            if (AppPrefs.getThreatAlerts(context)) {
+
+                vpnViewModel.refreshEvents()
+            }
+
             delay(3000)
         }
     }
@@ -126,14 +134,17 @@ fun DashboardScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
+
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             Image(
                 painter = painterResource(id = R.drawable.safetyicon),
                 contentDescription = "VPN Icon",
                 modifier = Modifier.size(100.dp)
             )
+
             Text(
                 text = "Welcome to Safety First",
                 fontSize = 25.sp,
@@ -236,51 +247,6 @@ fun DashboardScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFF2F3E63))
-                .padding(8.dp),
-
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-
-            Button(
-                onClick = {},
-
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2F3E63),
-                    contentColor = Color.White
-                )
-            ) {
-
-                Text("Dashboard")
-            }
-
-            Button(
-                onClick = ThreatsClick,
-
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2F3E63),
-                    contentColor = Color.White
-                )
-            ) {
-
-                Text("Threats")
-            }
-
-            Button(
-                onClick = SettingsClick,
-
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF2F3E63),
-                    contentColor = Color.White
-                )
-            ) {
-
-                Text("Settings")
-            }
-        }
         navbar()
     }
 }

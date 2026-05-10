@@ -2,6 +2,7 @@ package com.example.safetyfirst
 
 import android.Manifest
 import android.app.Activity
+import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -16,12 +17,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.safetyfirst.ui.*
+import com.example.safetyfirst.ui.common.Navbar
 
 class MainActivity : ComponentActivity() {
 
@@ -32,6 +35,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private val vpnViewModel: VpnViewModel by viewModels()
+    private val settingsViewModel: SettingsViewModel by viewModels()
     private lateinit var vpnReceiver: BroadcastReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,7 +84,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            AppNavigation(vpnViewModel = vpnViewModel)
+            AppNavigation(vpnViewModel = vpnViewModel, settingsViewModel = settingsViewModel)
         }
     }
 
@@ -125,8 +129,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppNavigation(vpnViewModel: VpnViewModel) {
+fun AppNavigation(vpnViewModel: VpnViewModel, settingsViewModel: SettingsViewModel) {
     val navController = rememberNavController()
+
+    val navbar: @Composable () -> Unit = {Navbar(
+        { navController.navigate(Routes.DashboardScreen) },
+        { navController.navigate(Routes.ThreatsScreen) },
+        { navController.navigate(Routes.SettingScreen) },
+    )}
 
     NavHost(
         navController = navController,
@@ -135,40 +145,35 @@ fun AppNavigation(vpnViewModel: VpnViewModel) {
         composable(Routes.DashboardScreen) {
             DashboardScreen(
                 vpnViewModel = vpnViewModel,
-                ThreatsClick = { navController.navigate(Routes.ThreatsScreen) },
-                SettingsClick = { navController.navigate(Routes.SettingScreen) }
+                navbar = navbar
             )
         }
 
         composable(Routes.ThreatsScreen) {
             ThreatsScreen(
-                DashsClick = { navController.navigate(Routes.DashboardScreen) },
-                ThreatsClick = { navController.navigate(Routes.ThreatsScreen) },
-                SettingsClick = { navController.navigate(Routes.SettingScreen) },
-                ThreatsLogClick = { navController.navigate(Routes.ThreatLogScreen) }
+                navbar = navbar,
+                threatsLogNavigate = { navController.navigate(Routes.ThreatLogScreen) }
             )
         }
 
-            composable(Routes.SettingScreen) {
-                SettingScreen(
-                    navbar = navbar,
-                    aboutNavigate = { navController.navigate(Routes.AboutScreen) }
-                )
-            }
+        composable(Routes.SettingScreen) {
+            SettingScreen(
+                settingsViewModel = settingsViewModel,
+                vpnViewModel = vpnViewModel,
+                navbar = navbar,
+                aboutNavigate = { navController.navigate(Routes.AboutScreen) }
+            )
+        }
 
         composable(Routes.ThreatLogScreen) {
             ThreatLogScreen(
-                DashsClick = { navController.navigate(Routes.DashboardScreen) },
-                ThreatsClick = { navController.navigate(Routes.ThreatsScreen) },
-                SettingsClick = { navController.navigate(Routes.SettingScreen) }
+                navbar = navbar
             )
         }
 
         composable(Routes.AboutScreen) {
             AboutScreen(
-                DashsClick = { navController.navigate(Routes.DashboardScreen) },
-                ThreatsClick = { navController.navigate(Routes.ThreatsScreen) },
-                SettingsClick = { navController.navigate(Routes.SettingScreen) }
+                backClick = { navController.navigate(Routes.SettingScreen) }
             )
         }
     }

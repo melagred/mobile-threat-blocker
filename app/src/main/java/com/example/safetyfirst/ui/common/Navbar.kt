@@ -14,7 +14,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun Navbar(dashboardNavigate: ()->Unit, threatsNavigate: ()->Unit, settingsNavigate: ()->Unit) {
+fun Navbar(
+    dashboardNavigate: ()->Unit,
+    threatsNavigate: ()->Unit,
+    settingsNavigate: ()->Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

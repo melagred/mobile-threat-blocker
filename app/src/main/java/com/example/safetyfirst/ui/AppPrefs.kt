@@ -5,6 +5,10 @@ import android.content.Context
 object AppPrefs {
     private const val FILE = "safetyfirst_prefs"
     private const val KEY_AUTO_START = "vpn_auto_start"
+    private const val KEY_CONNECTIONS_UPDATES = "key_connections_updates"
+    private const val KEY_WEEKLY_REPORTS = "weekly_reports"
+
+    private const val KEY_THREAT_ALERTS = "threat_alerts"
 
     fun getAutoStart(context: Context): Boolean =
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
